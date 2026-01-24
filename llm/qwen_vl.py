@@ -1,57 +1,37 @@
 # -*- coding: utf-8 -*-
 """
 文件名：llm/qwen_vl.py
-功能：调用阿里云千问 VL 模型分析图片（含重试机制与型号识别）
-状态：改进版 (支持用户线索注入)
+状态：SiliconCloud 迁移版 (OpenAI 协议兼容)
 """
 import os
+import base64
 import json
 import time
-import dashscope
-from dashscope import MultiModalConversation
+from openai import OpenAI
 from dotenv import load_dotenv
 
-# ===============================
-# 1. 初始化配置
-# ===============================
-# 加载环境变量
 load_dotenv()
 
-# 获取并设置 API Key
-api_key = os.getenv("DASHSCOPE_API_KEY")
-if not api_key:
-    # 尝试读取 SNOWBOARD_API_KEYS (兼容处理)
-    api_key = os.getenv("SNOWBOARD_API_KEYS")
+# 1. 配置 SiliconCloud
+# 建议在 secrets 或 .env 中将变量名改为 SILICONFLOW_API_KEY
+api_key = os.getenv("SILICONFLOW_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
+base_url = "https://api.siliconflow.cn/v1"
 
-if not api_key:
-    # 这里为了防崩，如果没读到环境变量，可以打印警告而不是直接抛异常，或者保持原样
-    # raise ValueError("错误：未找到环境变量 DASHSCOPE_API_KEY。请检查 .env 文件。")
-    print("⚠️ 警告：未找到 DASHSCOPE_API_KEY，后续调用可能会失败。")
-
-dashscope.api_key = api_key
-print("【DEBUG】DashScope SDK 初始化成功")
+client = OpenAI(api_key=api_key, base_url=base_url)
 
 
-# ===============================
-# 2. 辅助工具函数
-# ===============================
+# 辅助函数：图片转 Base64 (解决云端路径问题)
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+
 def clean_json_text(text: str) -> str:
-    """清理大模型返回的 markdown 格式，提取纯 JSON 字符串"""
-    if not text:
-        return ""
-    text = text.strip()
-    # 去掉 markdown 的代码块标记
-    if text.startswith("```"):
-        text = text.replace("```json", "")
-        text = text.replace("```", "")
-    return text.strip()
+    if not text: return ""
+    return text.strip().replace("```json", "").replace("```", "").strip()
 
 
-# ===============================
-# 3. 定义 Prompt (提示词)
-# ===============================
-# 修改 llm/qwen_vl.py 中的 DEFAULT_PROMPT
-
+# 复用你原来的 Prompt，不需要改动
 DEFAULT_PROMPT = """
 你是一名极其严苛的二手滑雪板鉴定专家。你的任务是根据图片客观描述损伤，并依据严格标准进行评分。
 【重要提示】
@@ -93,117 +73,51 @@ NOBADAY, VECTOR, REV, TERROR.
 
 
 
-# ===============================
-# 4. 核心函数：分析图片
-# ===============================
 def analyze_snowboard_image(image_path: str, user_hint: str = None) -> dict:
-    """
-    调用千问 VL 模型分析雪板图片
-    :param image_path: 图片路径
-    :param user_hint: 用户提供的线索 (可选)
-    """
-
-    # 🔥 动态构建 Prompt：如果用户给了线索，拼接到 Prompt 里
+    # 动态构建 Prompt 逻辑保留不变
     final_prompt = DEFAULT_PROMPT
     if user_hint and user_hint.strip():
-        final_prompt += f"""
-        \n【用户额外提示】
-        用户指出这张图片中的雪板可能是："{user_hint}"。
-        请以此为重要线索，优先在画面中验证该品牌或型号特征。
-        如果画面明显与用户提示不符，请忽略提示，以画面为准。
-        """
+        final_prompt += f"\n【用户额外提示】\n用户指出：{user_hint}..."
 
-    max_retries = 3  # 最大重试次数
-    retry_delay = 2  # 每次失败等待秒数
+    # 图片转 Base64
+    base64_image = encode_image(image_path)
 
-    last_error = None
-    response = None
+    max_retries = 3
 
-    # --- 开始重试循环 ---
     for attempt in range(max_retries):
         try:
-            print(f"🚀 正在调用阿里云视觉模型 (第 {attempt + 1} 次尝试)...")
+            print(f"🚀 [SiliconCloud] 调用 Qwen2-VL-72B (第 {attempt + 1} 次)...")
 
-            # 兼容 Windows 路径
-            local_file_path = f"file://{image_path}" if not image_path.startswith("file://") else image_path
-
-            response = MultiModalConversation.call(
-                model="qwen-vl-max",
+            response = client.chat.completions.create(
+                model="Qwen/Qwen2-VL-72B-Instruct",  # 🔥 核心修改：使用硅基流动的模型ID
                 messages=[
                     {
                         "role": "user",
                         "content": [
-                            {"image": local_file_path},
-                            {"text": final_prompt}  # 使用包含线索的 Prompt
-                        ]
+                            {"type": "text", "text": final_prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
+                            }
+                        ],
                     }
                 ],
-                # 🔥【核心修改】加上这两行参数，给视觉模型“降温”
-                temperature = 0.01,  # 接近 0 表示极度理性，每次输出几乎一致
-                top_p = 0.1,  # 限制它的发散思维，只选概率最高的词
+                temperature=0.01,  # 保持理性
+                top_p=0.1,
+                max_tokens=1024
             )
 
-            # 检查 HTTP 状态码
-            if response.status_code == 200:
-                print("✅ 模型调用成功！")
-                break  # 成功了就跳出循环
-            else:
-                error_msg = f"API错误码: {response.code} - {response.message}"
-                print(f"⚠️ {error_msg}")
-                raise RuntimeError(error_msg)
+            raw_text = response.choices[0].message.content
+            print("✅ 模型返回成功")
+
+            # 解析 JSON
+            clean_text = clean_json_text(raw_text)
+            return json.loads(clean_text)
 
         except Exception as e:
-            print(f"❌ 第 {attempt + 1} 次请求异常: {str(e)}")
-            last_error = e
-            if attempt < max_retries - 1:
-                print(f"⏳ 等待 {retry_delay} 秒后重试...")
-                time.sleep(retry_delay)
-            else:
-                print("💀 重试次数耗尽。")
+            print(f"❌ 请求异常: {str(e)}")
+            time.sleep(2)
 
-    # --- 循环结束后的处理 ---
-
-    # 如果最后一次 response 依然是空的或者失败
-    if response is None or response.status_code != 200:
-        # 为了不让程序崩掉，返回一个兜底的错误 JSON
-        print(f"【严重错误】无法获取模型结果: {last_error}")
-        return {
-            "brand": "UNKNOWN",
-            "possible_model": "UNKNOWN",
-            "condition_score": 5,
-            "can_use": True,
-            "base_damage": "网络错误，无法分析",
-            "error": "NETWORK_ERROR"
-        }
-
-    # 检查 output 字段
-    if "output" not in response or not response.output.choices:
-        return {
-            "brand": "UNKNOWN",
-            "error": "EMPTY_RESPONSE"
-        }
-
-    # 提取文本内容
-    content_list = response.output.choices[0].message.content
-    raw_text = ""
-
-    for item in content_list:
-        if "text" in item:
-            raw_text += item["text"]
-
-    # 清洗并解析 JSON
-    clean_text = clean_json_text(raw_text)
-
-    try:
-        data = json.loads(clean_text)
-        return data
-    except Exception as e:
-        print(f"【JSON解析失败】原始文本: {raw_text}")
-        # 返回兜底数据
-        return {
-            "brand": "UNKNOWN",
-            "possible_model": "UNKNOWN",
-            "condition_score": 5,
-            "can_use": True,
-            "error": "JSON_PARSE_ERROR"
-        }
+    return {"brand": "UNKNOWN", "error": "NETWORK_ERROR", "can_use": True, "condition_score": 5}

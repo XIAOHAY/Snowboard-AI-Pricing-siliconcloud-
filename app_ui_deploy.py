@@ -215,7 +215,7 @@ with tab1:
                     for idx, col in enumerate(cols):
                         with col:
                             if os.path.exists(image_paths[idx]):
-                                st.image(image_paths[idx], caption=f"视图 {idx + 1}", use_column_width=True)
+                                st.image(image_paths[idx], caption=f"视图 {idx + 1}", use_container_width=True)
                     st.info("⚡️ 演示模式：正在对 3 张视图进行【多模态融合分析】...")
 
                 loading_placeholder.markdown(LOADING_HTML, unsafe_allow_html=True)
@@ -275,7 +275,7 @@ with tab1:
                     with st.container():
                         c_img, c_btn = st.columns([1, 2])
                         with c_img:
-                            st.image(cover_img, use_column_width=True)
+                            st.image(cover_img, use_container_width=True)
                         with c_btn:
                             st.markdown(f"**{cfg['desc']}**")
                             if st.button(cfg['label'], key=key, use_container_width=True):
@@ -307,7 +307,7 @@ with tab1:
                 for idx, col in enumerate(cols):
                     with col:
                         if os.path.exists(paths[idx]):
-                            st.image(paths[idx], use_column_width=True, caption=f"视图 {idx + 1}")
+                            st.image(paths[idx], use_container_width=True, caption=f"视图 {idx + 1}")
                 st.info(
                     f"💡 **AI 综合分析结论：** 品牌锁定 `{data.get('brand')}` | 成色评分 `{data.get('condition_score')}` | 损伤检测 `{data.get('base_damage')}`")
 
