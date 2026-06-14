@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 文件名：llm/chat_service.py
-状态：SiliconCloud 适配版
+状态：SiliconCloud 适配版 · config 集中配置版
 """
 import os
 from dotenv import load_dotenv
@@ -9,27 +9,26 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
+from config import get_api_key, BASE_URL, CHAT_MODEL
+
 load_dotenv()
 
 
-# 🔥 务必确保函数名拼写正确，且没有被注释掉
 def get_follow_up_answer(user_question: str, appraisal_context: dict):
-    api_key = os.getenv("SILICONFLOW_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
-    base_url = "https://api.siliconflow.cn/v1"
+    api_key = get_api_key()
+    base_url = BASE_URL
 
     if not api_key:
         return "API Key 缺失。"
 
     try:
-        # 初始化模型
         chat_model = ChatOpenAI(
-            model="Qwen/Qwen2.5-72B-Instruct",
+            model=CHAT_MODEL,
             openai_api_key=api_key,
             openai_api_base=base_url,
             temperature=0.7
         )
 
-        # 简单的上下文摘要
         context_str = f"""
         品牌：{appraisal_context.get('brand')}
         型号：{appraisal_context.get('model')}

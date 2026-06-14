@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 文件名：llm/qwen_vl.py
-状态：SiliconCloud 迁移版 (OpenAI 协议兼容)
+状态：SiliconCloud 迁移版 (OpenAI 协议兼容) · config 集中配置版
+说明：key / base_url / 模型 ID 全部来自 config，改模型/换 API 不用动本文件。
 """
 import os
 import base64
@@ -12,12 +13,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 1. 配置 SiliconCloud
-# 建议在 secrets 或 .env 中将变量名改为 SILICONFLOW_API_KEY
-api_key = os.getenv("SILICONFLOW_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
-base_url = "https://api.siliconflow.cn/v1"
+# 配置统一从 config 读取（改 key / base_url / 模型只需改 Secrets 或 .env）
+from config import get_api_key, BASE_URL, VL_MODEL
 
-client = OpenAI(api_key=api_key, base_url=base_url)
+client = OpenAI(api_key=get_api_key(), base_url=BASE_URL)
 
 
 # 辅助函数：图片转 Base64 (解决云端路径问题)
@@ -27,11 +26,11 @@ def encode_image(image_path):
 
 
 def clean_json_text(text: str) -> str:
-    if not text: return ""
+    if not text:
+        return ""
     return text.strip().replace("```json", "").replace("```", "").strip()
 
 
-# 复用你原来的 Prompt，不需要改动
 DEFAULT_PROMPT = """
 你是一名极其严苛的二手滑雪板鉴定专家。你的任务是根据图片客观描述损伤，并依据严格标准进行评分。
 【重要提示】
@@ -40,7 +39,7 @@ DEFAULT_PROMPT = """
 3. 请忽略水印文字（如“闲鱼”、“小红书”等）。
 
 【已知品牌列表参考】
-BURTON, SALOMON, CAPITA, NITRO, K2, RIDE, ROME SDS, JONES, LIB TECH, GNU, 
+BURTON, SALOMON, CAPITA, NITRO, K2, RIDE, ROME SDS, JONES, LIB TECH, GNU,
 GRAY, OGASAKA, BC STREAM, MOSS, GENTEMSTICK, YONEX, 011 ARTISTIC, RICE28,
 BATALEON, LOBSTER, ARBOR, DC, HEAD, FLOW, FLUX, UNION, NIDECKER, YES,
 NOBADAY, VECTOR, REV, TERROR.
@@ -72,24 +71,21 @@ NOBADAY, VECTOR, REV, TERROR.
 """
 
 
-
 def analyze_snowboard_image(image_path: str, user_hint: str = None) -> dict:
-    # 动态构建 Prompt 逻辑保留不变
     final_prompt = DEFAULT_PROMPT
     if user_hint and user_hint.strip():
         final_prompt += f"\n【用户额外提示】\n用户指出：{user_hint}..."
 
-    # 图片转 Base64
     base64_image = encode_image(image_path)
 
     max_retries = 3
 
     for attempt in range(max_retries):
         try:
-            print(f"🚀 [SiliconCloud] 调用 Qwen2-VL-72B (第 {attempt + 1} 次)...")
+            print(f"🚀 [SiliconCloud] 调用 {VL_MODEL} (第 {attempt + 1} 次)...")
 
             response = client.chat.completions.create(
-                model="Qwen/Qwen2-VL-72B-Instruct",  # 🔥 核心修改：使用硅基流动的模型ID
+                model=VL_MODEL,  # 模型 ID 来自 config（改模型改这里 / 改 Secrets）
                 messages=[
                     {
                         "role": "user",
@@ -104,7 +100,7 @@ def analyze_snowboard_image(image_path: str, user_hint: str = None) -> dict:
                         ],
                     }
                 ],
-                temperature=0.01,  # 保持理性
+                temperature=0.01,
                 top_p=0.1,
                 max_tokens=1024
             )
@@ -112,7 +108,6 @@ def analyze_snowboard_image(image_path: str, user_hint: str = None) -> dict:
             raw_text = response.choices[0].message.content
             print("✅ 模型返回成功")
 
-            # 解析 JSON
             clean_text = clean_json_text(raw_text)
             return json.loads(clean_text)
 
