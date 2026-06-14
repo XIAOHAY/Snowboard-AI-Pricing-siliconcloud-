@@ -4,7 +4,7 @@
 作用：构建一个 tool-calling（函数调用）Agent。
      核心变化：从"传图→估价→点评"的写死流水线，升级为"模型自主决定调用哪个工具"。
 
-模型：SiliconFlow 的 Qwen2.5-72B-Instruct（OpenAI 协议兼容，支持 function calling）。
+模型 / key / base_url 统一来自 config（改模型不用动本文件）。
 """
 import os
 from dotenv import load_dotenv
@@ -13,6 +13,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 
 from agent.tools import ALL_TOOLS
+from config import get_api_key, BASE_URL, AGENT_MODEL
 
 load_dotenv()
 
@@ -36,22 +37,22 @@ SYSTEM_PROMPT = """你是「雪圈毒舌老炮」——一名有 15 年雪龄的
 
 def build_agent(verbose: bool = True) -> AgentExecutor:
     """构建并返回一个可执行的 Agent。"""
-    api_key = os.getenv("SILICONFLOW_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
+    api_key = get_api_key()
     if not api_key:
-        raise RuntimeError("缺少 SILICONFLOW_API_KEY，请在 .env 中配置。")
+        raise RuntimeError("缺少 API Key，请在 Streamlit Secrets 或 .env 中配置 DASHSCOPE_API_KEY。")
 
     llm = ChatOpenAI(
-        model="Qwen/Qwen2.5-72B-Instruct",
+        model=AGENT_MODEL,
         openai_api_key=api_key,
-        openai_api_base="https://api.siliconflow.cn/v1",
-        temperature=0.3,  # Agent 决策要稳一点，别太发散
+        openai_api_base=BASE_URL,
+        temperature=0.3,
     )
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", SYSTEM_PROMPT),
         MessagesPlaceholder("chat_history", optional=True),
         ("human", "{input}"),
-        MessagesPlaceholder("agent_scratchpad"),  # 工具调用的中间步骤
+        MessagesPlaceholder("agent_scratchpad"),
     ])
 
     agent = create_tool_calling_agent(llm, ALL_TOOLS, prompt)
@@ -59,19 +60,13 @@ def build_agent(verbose: bool = True) -> AgentExecutor:
         agent=agent,
         tools=ALL_TOOLS,
         verbose=verbose,
-        handle_parsing_errors=True,  # 工具/解析出错时兜底，不直接崩
-        max_iterations=6,            # 防止 Agent 死循环
+        handle_parsing_errors=True,
+        max_iterations=6,
     )
 
 
 def run_turn(executor: AgentExecutor, user_text: str,
              image_path: str = None, chat_history: list = None) -> str:
-    """跑一轮对话。
-
-    image_path：本轮如果用户上传了图片，把保存后的本地路径传进来；
-                函数会把它拼进输入，Agent 据此决定是否调用 appraise_snowboard。
-    chat_history：LangChain message 列表，用于多轮记忆。
-    """
     chat_history = chat_history or []
     user_input = user_text
     if image_path:
@@ -80,7 +75,6 @@ def run_turn(executor: AgentExecutor, user_text: str,
     return result["output"]
 
 
-# 命令行快速自测（无图：测品牌问答 / 知识问答）
 if __name__ == "__main__":
     ex = build_agent(verbose=True)
     print(run_turn(ex, "Burton 这个牌子的板保值吗？"))
