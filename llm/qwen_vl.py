@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 文件名：llm/qwen_vl.py
-状态：SiliconCloud 迁移版 (OpenAI 协议兼容) · config 集中配置版
-说明：key / base_url / 模型 ID 全部来自 config，改模型/换 API 不用动本文件。
+状态：config 档位动态选模型 + 用量埋点版。
 """
 import os
 import base64
@@ -13,13 +12,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 配置统一从 config 读取（改 key / base_url / 模型只需改 Secrets 或 .env）
-from config import get_api_key, BASE_URL, VL_MODEL
+from config import get_api_key, BASE_URL, get_vl_model
+from utils import usage
 
 client = OpenAI(api_key=get_api_key(), base_url=BASE_URL)
 
 
-# 辅助函数：图片转 Base64 (解决云端路径问题)
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
@@ -77,15 +75,15 @@ def analyze_snowboard_image(image_path: str, user_hint: str = None) -> dict:
         final_prompt += f"\n【用户额外提示】\n用户指出：{user_hint}..."
 
     base64_image = encode_image(image_path)
-
+    vl_model = get_vl_model()
     max_retries = 3
 
     for attempt in range(max_retries):
         try:
-            print(f"🚀 [SiliconCloud] 调用 {VL_MODEL} (第 {attempt + 1} 次)...")
+            print(f"🚀 [SiliconCloud] 调用 {vl_model} (第 {attempt + 1} 次)...")
 
             response = client.chat.completions.create(
-                model=VL_MODEL,  # 模型 ID 来自 config（改模型改这里 / 改 Secrets）
+                model=vl_model,
                 messages=[
                     {
                         "role": "user",
@@ -105,11 +103,16 @@ def analyze_snowboard_image(image_path: str, user_hint: str = None) -> dict:
                 max_tokens=1024
             )
 
+            # 用量埋点（视觉这次的 token）
+            try:
+                u = response.usage
+                usage.record(vl_model, u.prompt_tokens, u.completion_tokens)
+            except Exception:
+                pass
+
             raw_text = response.choices[0].message.content
             print("✅ 模型返回成功")
-
-            clean_text = clean_json_text(raw_text)
-            return json.loads(clean_text)
+            return json.loads(clean_json_text(raw_text))
 
         except Exception as e:
             print(f"❌ 请求异常: {str(e)}")

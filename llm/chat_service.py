@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 文件名：llm/chat_service.py
-状态：SiliconCloud 适配版 · config 集中配置版
+状态：config 集中配置 + 档位动态选模型版（追问对话用当前档位的文本模型）。
 """
 import os
 from dotenv import load_dotenv
@@ -9,7 +9,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-from config import get_api_key, BASE_URL, CHAT_MODEL
+from config import get_api_key, BASE_URL, get_chat_model
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ def get_follow_up_answer(user_question: str, appraisal_context: dict):
 
     try:
         chat_model = ChatOpenAI(
-            model=CHAT_MODEL,
+            model=get_chat_model(),
             openai_api_key=api_key,
             openai_api_base=base_url,
             temperature=0.7
