@@ -1,0 +1,10 @@
+﻿tier,vl_model,case,true_brand,pred_brand,brand_ok,fair_price,pred_mid,err_pct,tokens,cost,latency
+经济档,Qwen/Qwen3-VL-8B-Instruct,good_burton,BURTON,BURTON,True,3500,2450,0.3,7658,0.0,23.7
+经济档,Qwen/Qwen3-VL-8B-Instruct,bad_burton_custom,BURTON,LIB TECH,False,1200,450,0.625,10390,0.0,21.3
+经济档,Qwen/Qwen3-VL-8B-Instruct,old_ogasaka_fcs,OGASAKA,FLOW,False,2500,350,0.86,9446,0.0,21.6
+标准档,Qwen/Qwen3-VL-32B-Instruct,good_burton,BURTON,BURTON,True,3500,1200,0.6571428571428571,7663,0.014559700000000002,93.0
+标准档,Qwen/Qwen3-VL-32B-Instruct,bad_burton_custom,BURTON,GRAY,False,1200,900,0.25,10412,0.019782799999999996,49.3
+标准档,Qwen/Qwen3-VL-32B-Instruct,old_ogasaka_fcs,OGASAKA,OGASAKA,True,2500,1800,0.28,9459,0.017972099999999998,43.6
+旗舰档,Qwen/Qwen3.5-397B-A17B,good_burton,BURTON,BURTON,True,3500,1200,0.6571428571428571,26494,0.10942021999999998,170.1
+旗舰档,Qwen/Qwen3.5-397B-A17B,bad_burton_custom,BURTON,BURTON,True,1200,450,0.625,16641,0.06872733,68.1
+旗舰档,Qwen/Qwen3.5-397B-A17B,old_ogasaka_fcs,OGASAKA,VECTOR,False,2500,150,0.94,13677,0.05648601,44.0

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 文件名：pricing/review_generator.py
-状态：深度修复版 (防止 UnboundLocalError 阻断主流程) · config 集中配置版
+状态：config 集中配置 + 档位动态选模型版（点评用当前档位的文本模型）。
 """
 import os
 from dotenv import load_dotenv
@@ -9,7 +9,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-from config import get_api_key, BASE_URL, REVIEW_MODEL
+from config import get_api_key, BASE_URL, get_review_model
 
 load_dotenv()
 
@@ -28,7 +28,7 @@ def generate_expert_review(brand, model, condition_score, price_low, price_high,
 
     try:
         chat_model = ChatOpenAI(
-            model=REVIEW_MODEL,
+            model=get_review_model(),
             openai_api_key=api_key,
             openai_api_base=base_url,
             temperature=0.7

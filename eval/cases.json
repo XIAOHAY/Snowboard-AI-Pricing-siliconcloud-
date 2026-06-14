@@ -1,0 +1,29 @@
+{
+  "_说明": "评测数据集。images 路径相对仓库根目录。true_brand=正确品牌(大写英文)，fair_price=你认可的合理成交价(人民币)。请按真实情况补充更多 case，并把 fair_price 改成你认可的值。",
+  "cases": [
+    {
+      "id": "good_burton",
+      "images": ["examples/good_top.jpg", "examples/good_base.jpg", "examples/good_edge.jpg"],
+      "hint": "Burton Good Company龙年限定",
+      "true_brand": "BURTON",
+      "fair_price": 3500,
+      "note": "热门准新款（占位价，请改成你认可的合理价）"
+    },
+    {
+      "id": "bad_burton_custom",
+      "images": ["examples/bad_top.jpg", "examples/bad_base.jpg", "examples/bad_detail.jpg"],
+      "hint": "Burton Custom, heavy scratch",
+      "true_brand": "BURTON",
+      "fair_price": 1200,
+      "note": "战损（占位价，请改）"
+    },
+    {
+      "id": "old_ogasaka_fcs",
+      "images": ["examples/old_top.jpg", "examples/old_base.jpg", "examples/old_logo.jpg"],
+      "hint": "ogasaka fcs",
+      "true_brand": "OGASAKA",
+      "fair_price": 2500,
+      "note": "日系老款保值（占位价，请改）"
+    }
+  ]
+}

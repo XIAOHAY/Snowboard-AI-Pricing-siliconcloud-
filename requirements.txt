@@ -1,8 +1,9 @@
 streamlit
 openai>=1.0.0
-langchain
-langchain-openai
-langchain-community
+langchain>=0.2.0
+langchain-openai>=0.1.7
+langchain-community>=0.2.0
+langchain-core>=0.2.0
 python-dotenv
 pandas
 requests
