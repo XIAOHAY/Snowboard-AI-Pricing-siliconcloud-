@@ -5,3 +5,4 @@ snowboard_data.db
 .DS_Store
 .idea/
 .vscode/
+.streamlit/secrets.toml
