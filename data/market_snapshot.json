@@ -1,0 +1,23 @@
+{
+  "source": "闲鱼 (Goofish) via Apify zen-studio/goofish-xianyu-search-scraper",
+  "keyword": "单板滑雪板",
+  "filters": "个人闲置, 价格≥300, summary 模式",
+  "scraped_at": "2026-06-14",
+  "price_type": "挂牌价 (asking price)，非真实成交价，普遍偏高",
+  "listings": [
+    {"brand": "BURTON", "title": "Burton Talent Scout 女款 138cm Camber 硬度4-6", "price": 2300, "city": "浙江", "posted": "2026-01-27", "wants": 3},
+    {"brand": "BURTON", "title": "Burton Process 熊猫 152cm 含step on固定器", "price": 1300, "city": "陕西", "posted": "2026-04-30", "wants": 11},
+    {"brand": "SALOMON", "title": "Salomon ABSTRACT 外星人联名 151cm 板刃有锈", "price": 1330, "city": "吉林", "posted": "2026-02-27", "wants": 14},
+    {"brand": "SALOMON", "title": "Salomon Abstract 158cm 滑了一季 不带固定器", "price": 1600, "city": "青海", "posted": "2026-01-08", "wants": 21},
+    {"brand": "NITRO", "title": "Nitro T1 152cm 全能板 固定器已出", "price": 500, "city": "新疆", "posted": "2026-04-04", "wants": 1},
+    {"brand": "NITRO", "title": "Nitro 162cm 旱雪磨刃 板面有划痕", "price": 400, "city": "辽宁", "posted": "2026-05-10", "wants": 1},
+    {"brand": "CAPITA", "title": "Capita SuperDoa 161W 顶配公园自由式", "price": 1800, "city": "黑龙江", "posted": "2026-03-03", "wants": 11},
+    {"brand": "NOBADAY", "title": "Nobaday 小黑板 148cm 含固定器 板底正常划痕", "price": 1300, "city": "新疆", "posted": "2026-03-08", "wants": 9},
+    {"brand": "NOBADAY", "title": "Nobaday 小黑板 6.0 PRO 162W 进阶款 原价3200", "price": 830, "city": "吉林", "posted": "2026-03-15", "wants": 6},
+    {"brand": "COSONE", "title": "COSONE TEAM 145cm 带固定器 赠雪鞋", "price": 1000, "city": "黑龙江", "posted": "2026-05-03", "wants": 2},
+    {"brand": "COSONE", "title": "COSONE 儿童单板 90cm 带固定器 全新", "price": 600, "city": "山东", "posted": "2026-02-14", "wants": 7},
+    {"brand": "PRIME", "title": "PRIME 套装 155cm 板+快穿固定器+雪鞋 原价两千多", "price": 450, "city": "黑龙江", "posted": "2026-04-17", "wants": 0},
+    {"brand": "LOZEN", "title": "LOZEN 156cm + SKIFREE固定器 一口价 原价1500", "price": 650, "city": "吉林", "posted": "2026-05-10", "wants": 5},
+    {"brand": "NEVERBEENDONE", "title": "NEVERBEENDONE 5.0 152cm 硬度5 新手入门 不含固定器", "price": 328, "city": "河南", "posted": "2026-01-25", "wants": 25}
+  ]
+}

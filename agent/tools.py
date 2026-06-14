@@ -2,11 +2,12 @@
 """
 文件名：agent/tools.py
 作用：把现有能力封装成 LangChain 工具。
-     多图说明：本轮"待鉴定的图片"由前端通过 set_pending_images() 放进上下文，
-     appraise_snowboard 工具自己取——模型只负责决定"要不要估价"，不碰文件路径，更稳。
+     search_market_price 已接入真实闲鱼行情快照（data/market_snapshot.json）。
+     多图：本轮待鉴定图片由前端 set_pending_images() 放进上下文，appraise_snowboard 自取。
 """
 import os
 import json
+import statistics
 from collections import Counter
 from langchain_core.tools import tool
 
@@ -24,7 +25,6 @@ _PENDING_IMAGES = []
 
 
 def set_pending_images(paths):
-    """前端在每轮调用前设置本轮上传的图片路径列表。"""
     global _PENDING_IMAGES
     _PENDING_IMAGES = [p for p in (paths or []) if p]
 
@@ -33,50 +33,52 @@ def get_pending_images():
     return list(_PENDING_IMAGES)
 
 
+# ===== 真实行情快照（懒加载 + 缓存）=====
+_SNAPSHOT = None
+
+
+def _load_snapshot():
+    global _SNAPSHOT
+    if _SNAPSHOT is None:
+        path = os.path.join(os.path.dirname(__file__), "..", "data", "market_snapshot.json")
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                _SNAPSHOT = json.load(f)
+        except Exception:
+            _SNAPSHOT = {"listings": []}
+    return _SNAPSHOT
+
+
 @tool
 def appraise_snowboard(user_hint: str = "") -> str:
     """给【用户当前上传的雪板图片】做成色鉴定 + 确定性估价（支持多视图融合）。
 
     使用场景：用户上传了雪板图片，并且想估价 / 想卖 / 想买这块板时调用。
-    多张图（板面/板底/细节）会自动融合：品牌投票、成色取均值、损伤合并。
-    参数:
-        user_hint: 用户对品牌或型号的额外提示（如“这是小贺的板”），没有就传空字符串。
-    返回: JSON 字符串，含融合后的鉴定结果(analysis) 与价格区间(price)。
+    参数: user_hint: 用户对品牌或型号的额外提示，没有就传空字符串。
     """
     images = get_pending_images()
     if not images:
-        return json.dumps(
-            {"error": "NO_IMAGE", "message": "用户还没上传图片。请提示用户先上传雪板照片再估价。"},
-            ensure_ascii=False,
-        )
-
-    # 1. 逐张视觉鉴定
+        return json.dumps({"error": "NO_IMAGE", "message": "用户还没上传图片。请提示用户先上传雪板照片再估价。"},
+                          ensure_ascii=False)
     analyses = []
     for p in images:
         try:
             analyses.append(analyze_snowboard_image(p, user_hint or None))
         except Exception as e:
             analyses.append({"brand": "UNKNOWN", "error": str(e), "can_use": True, "condition_score": 5})
-
-    # 2. 多图融合（单图也走，保持一致）
     final = merge_analysis_results(analyses)
-
-    # merge 不保留型号，这里从各图里补一个最常见的有效型号（影响热门款溢价）
     models = [str(a.get("possible_model", "")).strip() for a in analyses]
     models = [m for m in models if m and m.upper() not in {"UNKNOWN", "NONE", "NULL", "未知型号"}]
     final["possible_model"] = Counter(models).most_common(1)[0][0] if models else ""
-
-    # 3. 确定性定价
     price = estimate_secondhand_price(final)
-    return json.dumps({"analysis": final, "price": price, "image_count": len(images)},
-                      ensure_ascii=False)
+    return json.dumps({"analysis": final, "price": price, "image_count": len(images)}, ensure_ascii=False)
 
 
 @tool
 def get_brand_liquidity(brand: str) -> str:
     """查询某个雪板品牌的【保值梯队】与保值系数。
 
-    使用场景：用户只是泛泛地问某品牌保不保值、掉不掉价，不涉及具体某块板、也没有图片时调用。
+    使用场景：用户泛泛问某品牌保不保值、掉不掉价，不涉及具体某块板、也没有图片时调用。
     参数: brand: 品牌名，中文绰号或英文均可（如 'Burton'、'菠萝'、'小贺'）。
     """
     raw = brand.strip()
@@ -95,22 +97,48 @@ def get_brand_liquidity(brand: str) -> str:
 
 @tool
 def search_market_price(brand: str, model: str = "") -> str:
-    """联网查询某型号雪板当前的【二手市场在售行情】，用于交叉验证估价是否合理。
+    """查询某品牌/型号在二手平台（闲鱼）的真实【挂牌价】行情，用于交叉验证估价。
 
-    使用场景：已经给出估价后，用户质疑“凭什么这个价” / 想看看市场实际挂多少时调用。
-    参数: brand 品牌；model 型号（可空）。
+    数据来自预抓取的闲鱼行情快照（挂牌价，非真实成交价，普遍偏高）。
+    参数: brand 品牌（英文或中文均可）；model 型号（可空）。
     """
-    # TODO(接真实数据源)：当前为示例数据，先保证 Agent 闭环可演示。
-    mock_listings = [
-        {"platform": "闲鱼", "title": f"{brand} {model} 二手", "price": 2600, "condition": "9成新"},
-        {"platform": "闲鱼", "title": f"{brand} {model}", "price": 1980, "condition": "8成新"},
-        {"platform": "小红书", "title": f"出 {brand} {model}", "price": 2200, "condition": "95新"},
-    ]
-    return json.dumps(
-        {"source": "MOCK_DATA", "listings": mock_listings,
-         "note": "当前为示例数据，尚未接入实时行情；回答时请说明这是参考而非真实成交价"},
-        ensure_ascii=False,
-    )
+    snap = _load_snapshot()
+    listings = snap.get("listings", [])
+    b = (brand or "").strip().upper()
+    m = (model or "").strip().upper()
+
+    def hit(it):
+        text = (str(it.get("brand", "")) + " " + str(it.get("title", ""))).upper()
+        if b and b not in text:
+            return False
+        if m and m not in text:
+            return False
+        return True
+
+    matches = [it for it in listings if hit(it)] if b else []
+
+    if not matches:
+        prices = [it["price"] for it in listings if it.get("price")]
+        out = {"source": "闲鱼行情快照", "matched": 0,
+               "note": f"快照里暂无『{brand} {model}』的样本。"}
+        if prices:
+            out["overall_range"] = {"low": min(prices), "median": statistics.median(prices), "high": max(prices)}
+            out["overall_sample"] = len(prices)
+            out["note"] += "下面是整体二手单板挂牌价范围(仅供参考)。"
+        out["snapshot_date"] = snap.get("scraped_at")
+        return json.dumps(out, ensure_ascii=False)
+
+    prices = sorted(it["price"] for it in matches if it.get("price"))
+    examples = [{"title": it["title"][:42], "price": it["price"], "city": it.get("city")} for it in matches[:3]]
+    return json.dumps({
+        "source": "闲鱼行情快照（挂牌价，非成交价，普遍偏高，作上界参考）",
+        "brand": brand, "matched": len(prices),
+        "price_low": prices[0],
+        "price_median": statistics.median(prices),
+        "price_high": prices[-1],
+        "examples": examples,
+        "snapshot_date": snap.get("scraped_at"),
+    }, ensure_ascii=False)
 
 
 @tool
