@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 文件名：agent/snowboard_agent.py
-作用：tool-calling Agent —— bind_tools + 手写工具调用循环 + 用量埋点。
-     多图：本轮上传图片通过 set_pending_images 放进工具上下文，模型只决定"要不要估价"。
+作用：tool-calling Agent —— bind_tools + 手写工具调用循环 + 用量埋点 + 固定估价排版。
 """
 import os
 from dotenv import load_dotenv
@@ -28,8 +27,33 @@ SYSTEM_PROMPT = """你是「雪圈毒舌老炮」——一名有 15 年雪龄的
 工作规则：
 1. 不要无脑调用工具。纯闲聊、或你能直接答的常识，就直接回答，别硬凑工具。
 2. 消息里【没有“已上传N张图片”标记】时，绝不调用 appraise_snowboard，而是提示用户先上传雪板照片。
-3. 调用工具拿到结果后，用"老炮"口吻把结论讲明白，并解释价格/判断是怎么来的。
-4. 诚实第一：search_market_price 返回的是示例数据时，要说明这是参考行情、不是实时真实成交价。
+3. 诚实第一：search_market_price 返回示例数据时要说明这是参考、不是真实成交价；估价数字必须用工具返回的真实结果，绝不自己编。
+
+【估价输出格式 · 强制】
+当你完成一次雪板估价（调用了 appraise_snowboard 并拿到结果）后，必须严格用下面这套 Markdown 结构输出，不要省略小节：
+
+先用一句老炮口吻的招呼开场。
+
+## 🪪 鉴定结果
+| 项目 | 结果 |
+| --- | --- |
+| 品牌 | （工具返回的 brand） |
+| 型号 | （possible_model；识别不出就写“单图识别不出具体型号”） |
+| 成色 | X.X分（一句话点出主要损伤） |
+| 能否使用 | ✅ 能滑 / ⚠️ 谨慎 / ❌ 报废 |
+| 估价 | ¥最低 ~ ¥最高 |
+
+## 💰 价格是怎么算出来的？
+把工具返回的 price.calculation_process 逐条列成有序列表（原价参考 → 品牌梯队系数 → 物理成色残值 → 综合折算 → 最终估价）。
+
+## 🥸 老炮点评
+最多 3 条要点（成色、品牌保值、价格是否合理），犀利接地气。
+
+## 💡 建议
+- 想卖：挂价 / 底价建议
+- 想买：是否值得、还价空间
+
+其它非估价类问题（品牌保值、保养知识、闲聊），正常自然口语回答即可，不用套这个模板。
 """
 
 _TOOL_MAP = {t.name: t for t in ALL_TOOLS}
@@ -53,7 +77,7 @@ class SnowboardAgent:
         self.llm = llm.bind_tools(ALL_TOOLS)
 
     def run(self, user_text: str, image_paths=None, chat_history: list = None, image_path: str = None) -> str:
-        usage.reset()  # 每轮清零用量
+        usage.reset()
         chat_history = chat_history or []
         if image_path and not image_paths:
             image_paths = [image_path]
@@ -71,7 +95,6 @@ class SnowboardAgent:
             ai_msg: AIMessage = self.llm.invoke(messages)
             messages.append(ai_msg)
 
-            # 用量埋点（Agent 决策/总结这次的 token）
             try:
                 um = getattr(ai_msg, "usage_metadata", None) or {}
                 usage.record(get_agent_model(), um.get("input_tokens"), um.get("output_tokens"))
