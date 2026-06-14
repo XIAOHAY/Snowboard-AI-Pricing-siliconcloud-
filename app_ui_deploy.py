@@ -2,6 +2,7 @@
 """
 文件名：app_ui_deploy.py
 状态：最终完整版 (两列布局 + 多图演示 + 结果回显 + 自动定价修正)
+修复：用户上传的图片在鉴定结束后会在结果页回显（此前只有演示案例能回显）。
 """
 import streamlit as st
 import pandas as pd
@@ -126,10 +127,13 @@ with tab1:
                     try:
                         # 1. 视觉分析
                         analysis_results = []
+                        uploaded_images_bytes = []  # 🔥 存下用户上传的图，用于结果页回显
                         for uploaded_file in uploaded_files:
+                            file_bytes = uploaded_file.read()  # 只读一次，存起来
+                            uploaded_images_bytes.append(file_bytes)
                             suffix = os.path.splitext(uploaded_file.name)[1]
                             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-                                tmp.write(uploaded_file.read())
+                                tmp.write(file_bytes)
                                 temp_path = tmp.name
                             try:
                                 res = analyze_snowboard_image(temp_path, user_hint=user_hint)
@@ -162,7 +166,8 @@ with tab1:
                                 "condition_score": final_analysis.get("condition_score"),
                                 "base_damage": final_analysis.get("base_damage"),
                                 "edge_damage": final_analysis.get("edge_damage"),
-                                "calculation_process": price_result.get("calculation_process", [])
+                                "calculation_process": price_result.get("calculation_process", []),
+                                "uploaded_images": uploaded_images_bytes  # 🔥 回显用
                             }
                             loading_placeholder.empty()
                             st.rerun()
@@ -299,7 +304,7 @@ with tab1:
         st.divider()
         st.success("✅ 鉴定完成")
 
-        # 🔥 多图回显逻辑
+        # 🔥 回显逻辑：演示案例显示底图，用户上传显示上传图
         if "demo_image_paths" in data:
             with st.expander("📷 查看分析底图 (3视图)", expanded=True):
                 paths = data["demo_image_paths"]
@@ -308,6 +313,15 @@ with tab1:
                     with col:
                         if os.path.exists(paths[idx]):
                             st.image(paths[idx], use_container_width=True, caption=f"视图 {idx + 1}")
+                st.info(
+                    f"💡 **AI 综合分析结论：** 品牌锁定 `{data.get('brand')}` | 成色评分 `{data.get('condition_score')}` | 损伤检测 `{data.get('base_damage')}`")
+        elif data.get("uploaded_images"):
+            with st.expander("📷 你上传的图片", expanded=True):
+                imgs = data["uploaded_images"]
+                cols = st.columns(len(imgs))
+                for idx, col in enumerate(cols):
+                    with col:
+                        st.image(imgs[idx], use_container_width=True, caption=f"上传图 {idx + 1}")
                 st.info(
                     f"💡 **AI 综合分析结论：** 品牌锁定 `{data.get('brand')}` | 成色评分 `{data.get('condition_score')}` | 损伤检测 `{data.get('base_damage')}`")
 
@@ -344,7 +358,7 @@ with tab1:
                                 price_low=p_low, price_high=p_high,
                                 base_damage=data.get("base_damage"), edge_damage=data.get("edge_damage")
                             )
-                            # 保持 demo_image_paths 不丢失
+                            # 保持 demo_image_paths / uploaded_images 不丢失
                             updated_data = {
                                 "brand": new_brand, "model": new_model, "condition_score": new_score,
                                 "price_low": p_low, "price_high": p_high,
