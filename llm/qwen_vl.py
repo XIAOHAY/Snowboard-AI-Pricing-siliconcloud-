@@ -2,6 +2,8 @@
 """
 文件名：llm/qwen_vl.py
 状态：config 档位动态选模型 + 用量埋点版。
+更新：视觉提示词新增「看不到清晰品牌LOGO就返回UNKNOWN、禁止猜」规则，
+     避免多图融合时无 LOGO 的图（如板底图案）瞎猜品牌污染投票结果。
 """
 import os
 import base64
@@ -35,15 +37,16 @@ DEFAULT_PROMPT = """
 1. 图片中可能包含竖排、旋转或艺术字体的 LOGO，请仔细辨认。
 2. **注意区分通用词与品牌**：例如 "GRAY", "RIDE", "SIGNAL", "YES", "FLOW" 在这里是【品牌名】，而不是普通单词。
 3. 请忽略水印文字（如“闲鱼”、“小红书”等）。
+4. **认不出就老实说**：如果这张图里看不到清晰的品牌 LOGO 或品牌文字（例如只拍了板底图案、纯色板面、局部细节），brand 必须返回 "UNKNOWN"。**绝对禁止**靠板型、图案、配色、风格去猜测品牌——宁可返回 UNKNOWN，也不要瞎猜。
 
 【已知品牌列表参考】
 BURTON, SALOMON, CAPITA, NITRO, K2, RIDE, ROME SDS, JONES, LIB TECH, GNU,
 GRAY, OGASAKA, BC STREAM, MOSS, GENTEMSTICK, YONEX, 011 ARTISTIC, RICE28,
 BATALEON, LOBSTER, ARBOR, DC, HEAD, FLOW, FLUX, UNION, NIDECKER, YES,
-NOBADAY, VECTOR, REV, TERROR.
+NOBADAY, VECTOR, REV, TERROR, ROSSIGNOL.
 【第一步：强制视觉推理】
 在输出 JSON 之前，你必须先在心中（或作为"thinking"字段）确认以下细节：
-1. **板面 (Top sheet)**：是否有边缘崩裂(Chipping)？固定器安装区是否有压痕？
+1. **板面 (Top sheet)**：是否有边缘崩裂(Chipping)？固定器安装区是否有压痕？是否能看到品牌 LOGO？
 2. **板底 (Base)**：是否有露芯深划痕(Core Shot)？还是仅仅是发丝痕(Hairline)？
 3. **板刃 (Edge)**：是否有断裂？是否有锈迹（浮锈还是腐蚀）？
 
@@ -58,7 +61,7 @@ NOBADAY, VECTOR, REV, TERROR.
 请输出且仅输出以下 JSON 格式：
 {
   "reasoning": "一句话描述你看到的损伤证据（例如：板头左侧有明显的边缘崩裂，板底有两条浅划痕）",
-  "brand": "品牌英文大写 (例如 BURTON)",
+  "brand": "品牌英文大写（看不到清晰 LOGO 必须返回 UNKNOWN，禁止猜）",
   "possible_model": "型号猜测",
   "condition_score": "1-10的整数",
   "base_damage": "板底具体损伤 (无/轻微/严重)",
