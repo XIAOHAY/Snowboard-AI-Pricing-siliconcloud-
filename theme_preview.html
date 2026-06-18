@@ -114,6 +114,8 @@ h1,h2,h3,h4{color:var(--c-ink); letter-spacing:-.3px; margin:0;}
 .foot .b{font-weight:900; color:var(--c-ink);} .foot .s{font-size:.84rem; color:var(--c-muted);} .foot a{color:var(--c-primary-2); text-decoration:none;}
 .divider{height:1px;background:var(--c-line);margin:46px 0;}
 .statebadge{display:inline-block;background:rgba(43,127,255,.1);color:var(--c-primary-2);font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:999px;border:1px solid var(--c-line-soft);}
+.tierpill{background:rgba(255,255,255,.7);border:1px solid var(--c-line);border-radius:999px;padding:8px 16px;font-size:.88rem;font-weight:600;color:var(--c-text);}
+.tierpill.active{background:var(--grad);color:#fff;border:none;box-shadow:0 8px 18px rgba(43,127,255,.3);}
 @media(max-width:900px){.hero-grid,.steps,.features,.tool,.price-panel{grid-template-columns:1fr;} .hero h1{font-size:2.3rem;}}
 </style>
 </head>
@@ -177,6 +179,15 @@ h1,h2,h3,h4{color:var(--c-ink); letter-spacing:-.3px; margin:0;}
 
   <div class="section">
     <div class="sec-head"><span class="overline">Start now</span><h2>开始鉴定</h2><p>上传你的照片，或一键体验演示案例。</p></div>
+    <div class="card" style="margin-bottom:22px;">
+      <div class="card-head"><div class="ic">🎚️</div><div><div class="tt">选择鉴定档位</div><div class="ds">档位越高识别越准、成本越高；演示用标准档即可</div></div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <span class="tierpill">经济档 · 省钱量大</span>
+        <span class="tierpill active">标准档 · 均衡识别准（默认）</span>
+        <span class="tierpill">旗舰档 · 最强识别</span>
+      </div>
+      <div style="font-size:.8rem;color:var(--c-muted);margin-top:10px;">👁️ 视觉模型 <code>Qwen3-VL-32B</code> ｜ 🧠 文本模型 <code>Qwen3.5-27B</code></div>
+    </div>
     <div class="tool">
       <div class="card">
         <div class="card-head"><div class="ic">📤</div><div><div class="tt">上传照片</div><div class="ds">已有照片？直接上传体验 AI 鉴定</div></div></div>

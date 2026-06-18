@@ -34,6 +34,8 @@ except ImportError as e:
     st.error(f"模块导入失败: {e}. 请确保文件结构正确。")
     st.stop()
 
+import config  # 模型档位配置（经济/标准/旗舰）
+
 # ==========================================
 # 2. 页面配置
 # ==========================================
@@ -216,6 +218,12 @@ h1,h2,h3{color:var(--c-ink); letter-spacing:-.3px;}
 /* 图片 */
 [data-testid="stImage"] img{border-radius:14px; box-shadow:var(--sh-sm);}
 
+/* 档位单选 → 分段药丸 */
+[data-testid="stRadio"] [role="radiogroup"]{gap:10px; flex-wrap:wrap;}
+[data-testid="stRadio"] label{background:rgba(255,255,255,.7); border:1px solid var(--c-line);
+  border-radius:999px; padding:8px 16px; transition:all .18s ease; cursor:pointer;}
+[data-testid="stRadio"] label:hover{border-color:var(--c-primary); box-shadow:var(--sh-sm);}
+
 hr{border-color:var(--c-line)!important;}
 
 /* ====================================================== */
@@ -332,6 +340,11 @@ if "current_data" not in st.session_state:
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+# 模型档位：初始化 + 每次运行即时生效（鉴定/点评/聊天都按此档位选模型）
+if "tier" not in st.session_state:
+    st.session_state.tier = config.DEFAULT_TIER
+config.set_active_tier(st.session_state.tier)
+
 
 # ==========================================
 # 6. 落地页静态区块（HTML 渲染函数）
@@ -435,6 +448,22 @@ if not st.session_state.current_data:
   </div>
 </div>
 """, unsafe_allow_html=True)
+
+    # ---------- 档位选择（鉴定前先选模型档位）----------
+    with st.container(border=True):
+        st.markdown(
+            '<div class="card-head"><div class="ic">🎚️</div>'
+            '<div><div class="tt">选择鉴定档位</div>'
+            '<div class="ds">档位越高识别越准、成本越高；演示用标准档即可</div></div></div>',
+            unsafe_allow_html=True)
+        tier_names = list(config.TIERS.keys())
+        st.radio(
+            "选择模型档位", tier_names, key="tier", horizontal=True,
+            label_visibility="collapsed",
+            format_func=lambda t: f"{t} · {config.TIERS[t]['desc']}",
+        )
+        _t = config.TIERS[st.session_state.tier]
+        st.caption(f"👁️ 视觉模型 `{_t['vl']}` ｜ 🧠 文本模型 `{_t['text']}`")
 
     col_upload, col_demo = st.columns([1, 1], gap="large")
 
