@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阿尔卑斯·清爽蓝白主题 — 视觉预览</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+:root{
+  --ski-sky:#eaf4ff; --ski-snow:#f8fbff; --ski-ice:#d6ecff;
+  --ski-primary:#2b7fff; --ski-primary-deep:#1466e6; --ski-deep:#0b3d91;
+  --ski-cyan:#38bdf8; --ski-text:#15324f; --ski-muted:#5b7793;
+  --ski-glass:rgba(255,255,255,.72); --ski-line:rgba(43,127,255,.16);
+  --ski-radius:18px; --ski-shadow:0 14px 40px rgba(20,80,160,.14);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; min-height:100vh; color:var(--ski-text);
+  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  background:
+    radial-gradient(1100px 520px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(900px 460px at 88% 0%, #dcefff 0%, rgba(220,239,255,0) 55%),
+    linear-gradient(180deg, var(--ski-sky) 0%, var(--ski-snow) 42%, #ffffff 100%);
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 70% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 45% 60%, #cfe6ff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 85% 70%, #fff 50%, transparent 51%);
+  background-size:600px 600px,500px 500px,400px 400px,450px 450px;
+}
+.wrap{max-width:980px; margin:0 auto; padding:32px 24px 60px; position:relative; z-index:1;}
+.note{font-size:.85rem;color:var(--ski-muted);margin:0 0 18px;}
+
+/* Hero */
+.ski-hero{position:relative; overflow:hidden; border-radius:24px; padding:30px 34px;
+  background:linear-gradient(120deg,var(--ski-deep) 0%, var(--ski-primary) 55%, var(--ski-cyan) 100%);
+  box-shadow:var(--ski-shadow); margin-bottom:22px;}
+.ski-hero::after{content:""; position:absolute; right:-40px; bottom:-60px; width:280px; height:280px;
+  background:radial-gradient(circle, rgba(255,255,255,.30) 0%, rgba(255,255,255,0) 70%);}
+.ski-hero h1{margin:0; color:#fff; font-weight:800; font-size:2rem; letter-spacing:.5px; text-shadow:0 2px 10px rgba(0,0,0,.18);}
+.ski-hero p{margin:.5rem 0 0; color:#eaf4ff;}
+.ski-chips{margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;}
+.ski-chips span{background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+  color:#fff; font-size:.78rem; padding:5px 12px; border-radius:999px;}
+
+h3{color:var(--ski-deep); font-weight:800;}
+.cols{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+.card{background:var(--ski-glass); backdrop-filter:blur(8px); border:1px solid var(--ski-line);
+  border-radius:var(--ski-radius); padding:18px 20px; box-shadow:var(--ski-shadow);}
+.dropzone{background:rgba(255,255,255,.6); border:1.5px dashed var(--ski-primary);
+  border-radius:var(--ski-radius); padding:26px; text-align:center; color:var(--ski-muted); margin-top:10px;}
+.btn{display:inline-block; border-radius:999px; font-weight:700; padding:10px 22px; cursor:pointer; border:none;
+  background:linear-gradient(120deg,var(--ski-primary) 0%, var(--ski-cyan) 100%); color:#fff;
+  box-shadow:0 8px 18px rgba(43,127,255,.30); margin-top:12px;}
+.btn.ghost{background:rgba(255,255,255,.85); color:var(--ski-primary-deep); border:1px solid var(--ski-line); box-shadow:0 4px 14px rgba(20,80,160,.08);}
+.demo-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--ski-line);}
+.thumb{width:64px;height:44px;border-radius:10px;background:linear-gradient(135deg,#cfe6ff,#9cc6ff);box-shadow:0 4px 10px rgba(20,80,160,.18);}
+
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0;}
+.metric{background:var(--ski-glass);backdrop-filter:blur(8px);border:1px solid var(--ski-line);
+  border-radius:var(--ski-radius);padding:16px 18px;box-shadow:var(--ski-shadow);}
+.metric .label{color:var(--ski-muted);font-size:.85rem;}
+.metric .value{color:var(--ski-deep);font-weight:800;font-size:1.7rem;margin-top:4px;}
+.alert{background:rgba(214,236,255,.55);border:1px solid var(--ski-line);border-radius:14px;padding:12px 16px;margin:8px 0;}
+.alert.ok{background:rgba(209,250,229,.5);}
+.chat{background:var(--ski-glass);border:1px solid var(--ski-line);border-radius:16px;padding:12px 16px;margin:8px 0;box-shadow:0 4px 14px rgba(20,80,160,.06);}
+
+/* loading card */
+.loading-stage{display:flex;justify-content:center;margin-top:26px;}
+.glass-card{width:340px;padding:30px 20px;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);
+  border:1px solid rgba(43,127,255,.25);border-radius:22px;box-shadow:0 24px 60px rgba(11,61,145,.35);
+  text-align:center;}
+.loading-text{font-size:1.3rem;font-weight:800;color:#0b3d91;margin-bottom:6px;}
+.sub-text{font-size:.85rem;color:#5b7793;}
+.ski-progress{width:70%;height:6px;margin:16px auto 0;border-radius:999px;overflow:hidden;background:rgba(43,127,255,.15);}
+.ski-progress i{display:block;height:100%;width:40%;border-radius:999px;
+  background:linear-gradient(90deg,#2b7fff,#38bdf8);animation:ski-slide 1.4s ease-in-out infinite;}
+.spin{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;border:5px solid rgba(43,127,255,.18);
+  border-top-color:#2b7fff;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes ski-slide{0%{margin-left:-40%;}100%{margin-left:100%;}}
+.tag{display:inline-block;font-size:.72rem;color:var(--ski-primary-deep);background:rgba(43,127,255,.1);
+  padding:3px 10px;border-radius:999px;margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="note">📐 这是 Streamlit 应用 <b>app_ui_deploy.py</b> 套用「阿尔卑斯·清爽蓝白」皮肤后的静态视觉预览（HTML 模拟，真实页面由 Streamlit 渲染，效果一致）。</p>
+
+  <div class="ski-hero">
+    <h1>🏂 AI 二手雪板智能定价系统</h1>
+    <p>多模态视觉鉴定 · 智能估价 · 老炮儿在线咨询，像雪场宗师一样一眼识板。</p>
+    <div class="ski-chips">
+      <span>❄️ Qwen-VL 视觉鉴定</span>
+      <span>📊 智能定价引擎</span>
+      <span>💬 多轮对话咨询</span>
+      <span>⚡ 在线 Demo</span>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="card">
+      <h3>📤 上传照片</h3>
+      <div style="color:var(--ski-muted);font-size:.85rem;">已有照片？直接上传体验 AI 鉴定。</div>
+      <div class="dropzone">⬆️ 点击或拖拽上传图片<br><span style="font-size:.8rem;">JPG / PNG · 支持多图</span></div>
+      <button class="btn">🚀 开始分析</button>
+    </div>
+    <div class="card">
+      <h3>⚡️ 一键体验</h3>
+      <div style="color:var(--ski-muted);font-size:.85rem;">没有照片？点击案例体验多视图融合分析。</div>
+      <div class="demo-row"><div class="thumb"></div><div><b>热门准新款</b></div><button class="btn ghost" style="margin-left:auto;margin-top:0;">✨ 保值神板</button></div>
+      <div class="demo-row"><div class="thumb"></div><div><b>板底严重划痕</b></div><button class="btn ghost" style="margin-left:auto;margin-top:0;">🥊 识别损伤</button></div>
+      <div class="demo-row" style="border:none;"><div class="thumb"></div><div><b>老牌保值款</b></div><button class="btn ghost" style="margin-left:auto;margin-top:0;">🔍 日系经典</button></div>
+    </div>
+  </div>
+
+  <div class="loading-stage">
+    <div class="glass-card">
+      <div class="tag">LOADING 加载态</div>
+      <div class="spin"></div>
+      <div class="loading-text">❄️ 雪场宗师鉴定中...</div>
+      <div class="sub-text">AI 正在进行多模态融合分析，请稍候片刻</div>
+      <div class="ski-progress"><i></i></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:30px;">✅ 鉴定结果（看板）</h3>
+  <div class="metrics">
+    <div class="metric"><div class="label">📉 最低</div><div class="value">¥1,280</div></div>
+    <div class="metric"><div class="label">🏷️ 均价</div><div class="value">¥1,650</div></div>
+    <div class="metric"><div class="label">📈 最高</div><div class="value">¥2,020</div></div>
+  </div>
+  <div class="alert ok">✅ 鉴定完成 · 品牌锁定 <code>BURTON</code> · 成色 <code>8.5</code></div>
+  <div class="alert">🗣️ <b>专家点评</b>：这块板成色不错，热门保值款，按当前市场行情属于抢手货，价格坚挺。</div>
+  <div class="chat">👤 这个估价能再高点吗？</div>
+  <div class="chat">🤖 老炮儿：板型保值，如果配件齐全、近期雪季，挂 1900 也有人接。</div>
+</div>
+</body>
+</html>

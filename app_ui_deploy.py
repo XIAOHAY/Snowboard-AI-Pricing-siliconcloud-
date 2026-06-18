@@ -2,6 +2,7 @@
 """
 文件名：app_ui_deploy.py
 状态：最终完整版 (两列布局 + 多图演示 + 结果回显 + 自动定价修正)
+皮肤：阿尔卑斯·清爽蓝白主题 (Design Token + 全局 CSS 注入)
 修复：用户上传的图片在鉴定结束后会在结果页回显（此前只有演示案例能回显）。
 """
 import streamlit as st
@@ -38,8 +39,153 @@ except ImportError as e:
 # ==========================================
 st.set_page_config(page_title="AI 雪板鉴定 Pro", page_icon="🏂", layout="wide")
 
-st.title("🏂 AI 二手雪板智能定价系统 (Online Demo)")
-st.caption("💡 这是一个在线演示版本，支持 AI 视觉鉴定、价格计算及多轮对话。")
+# ==========================================
+# 2.1 阿尔卑斯·清爽蓝白 主题皮肤 (Design Token + 全局 CSS)
+# 设计：资深 UI 设计师 / 实现：终极开发者
+# ==========================================
+ALPINE_THEME_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+/* ---------- Design Token ---------- */
+:root{
+  --ski-sky:#eaf4ff; --ski-snow:#f8fbff; --ski-ice:#d6ecff;
+  --ski-primary:#2b7fff; --ski-primary-deep:#1466e6; --ski-deep:#0b3d91;
+  --ski-cyan:#38bdf8; --ski-text:#15324f; --ski-muted:#5b7793;
+  --ski-glass:rgba(255,255,255,.72); --ski-line:rgba(43,127,255,.16);
+  --ski-radius:18px; --ski-shadow:0 14px 40px rgba(20,80,160,.14);
+}
+
+/* ---------- 雪景渐变背景 ---------- */
+.stApp{
+  background:
+    radial-gradient(1100px 520px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(900px 460px at 88% 0%, #dcefff 0%, rgba(220,239,255,0) 55%),
+    linear-gradient(180deg, var(--ski-sky) 0%, var(--ski-snow) 42%, #ffffff 100%);
+  color:var(--ski-text);
+  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+}
+/* 顶部飘雪点缀 */
+.stApp::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 70% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 45% 60%, #cfe6ff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 85% 70%, #fff 50%, transparent 51%);
+  background-size:600px 600px,500px 500px,400px 400px,450px 450px;
+}
+[data-testid="stHeader"]{background:transparent;}
+.block-container{padding-top:2.2rem; position:relative; z-index:1;}
+
+/* ---------- Hero 头图 ---------- */
+.ski-hero{
+  position:relative; overflow:hidden; border-radius:24px; padding:30px 34px;
+  background:linear-gradient(120deg,var(--ski-deep) 0%, var(--ski-primary) 55%, var(--ski-cyan) 100%);
+  box-shadow:var(--ski-shadow); margin-bottom:18px;
+}
+.ski-hero::after{
+  content:""; position:absolute; right:-40px; bottom:-60px; width:280px; height:280px;
+  background:radial-gradient(circle, rgba(255,255,255,.30) 0%, rgba(255,255,255,0) 70%);
+}
+.ski-hero h1{
+  margin:0; color:#fff; font-weight:800; font-size:2rem; letter-spacing:.5px;
+  text-shadow:0 2px 10px rgba(0,0,0,.18);
+}
+.ski-hero p{margin:.5rem 0 0; color:#eaf4ff; font-size:1rem;}
+.ski-hero .ski-chips{margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;}
+.ski-hero .ski-chips span{
+  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+  color:#fff; font-size:.78rem; padding:5px 12px; border-radius:999px; backdrop-filter:blur(6px);
+}
+
+/* ---------- 侧边栏：磨砂玻璃 ---------- */
+[data-testid="stSidebar"]{
+  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(231,243,255,.85));
+  backdrop-filter:blur(10px); border-right:1px solid var(--ski-line);
+}
+
+/* ---------- 标题 / 文本 ---------- */
+h2,h3,.stMarkdown h2,.stMarkdown h3{color:var(--ski-deep)!important; font-weight:800;}
+
+/* ---------- 主按钮：冰川蓝胶囊 ---------- */
+.stButton>button{
+  border-radius:999px; border:1px solid var(--ski-line); font-weight:700;
+  background:rgba(255,255,255,.85); color:var(--ski-primary-deep);
+  transition:all .18s ease-out; box-shadow:0 4px 14px rgba(20,80,160,.08);
+}
+.stButton>button:hover{transform:translateY(-2px); box-shadow:0 10px 22px rgba(20,80,160,.18); border-color:var(--ski-primary);}
+.stButton>button[kind="primary"], .stButton>button[data-testid="baseButton-primary"]{
+  background:linear-gradient(120deg,var(--ski-primary) 0%, var(--ski-cyan) 100%);
+  color:#fff; border:none;
+}
+.stButton>button[kind="primary"]:hover{box-shadow:0 12px 26px rgba(43,127,255,.40);}
+
+/* ---------- 价格看板 metric：磨砂玻璃卡 ---------- */
+[data-testid="stMetric"]{
+  background:var(--ski-glass); backdrop-filter:blur(8px);
+  border:1px solid var(--ski-line); border-radius:var(--ski-radius);
+  padding:16px 18px; box-shadow:var(--ski-shadow);
+}
+[data-testid="stMetricValue"]{color:var(--ski-deep); font-weight:800;}
+[data-testid="stMetricLabel"]{color:var(--ski-muted);}
+
+/* ---------- Tabs ---------- */
+.stTabs [data-baseweb="tab-list"]{gap:6px; border-bottom:1px solid var(--ski-line);}
+.stTabs [data-baseweb="tab"]{
+  border-radius:12px 12px 0 0; padding:8px 18px; color:var(--ski-muted); font-weight:600;
+}
+.stTabs [aria-selected="true"]{
+  background:rgba(255,255,255,.7); color:var(--ski-primary-deep)!important;
+  border:1px solid var(--ski-line); border-bottom:2px solid var(--ski-primary);
+}
+
+/* ---------- 提示框 / alert ---------- */
+[data-testid="stAlert"]{border-radius:14px; border:1px solid var(--ski-line); backdrop-filter:blur(6px);}
+
+/* ---------- Expander 折叠卡 ---------- */
+[data-testid="stExpander"]{
+  border:1px solid var(--ski-line); border-radius:var(--ski-radius);
+  background:var(--ski-glass); box-shadow:0 6px 18px rgba(20,80,160,.08); overflow:hidden;
+}
+
+/* ---------- 输入框 / 上传区 ---------- */
+[data-testid="stFileUploaderDropzone"]{
+  background:rgba(255,255,255,.6); border:1.5px dashed var(--ski-primary);
+  border-radius:var(--ski-radius);
+}
+.stTextInput input, .stTextArea textarea{
+  border-radius:12px!important; border:1px solid var(--ski-line)!important; background:rgba(255,255,255,.8)!important;
+}
+
+/* ---------- 聊天气泡 ---------- */
+[data-testid="stChatMessage"]{
+  background:var(--ski-glass); border:1px solid var(--ski-line);
+  border-radius:16px; box-shadow:0 4px 14px rgba(20,80,160,.06);
+}
+
+/* ---------- 图片圆角 ---------- */
+[data-testid="stImage"] img{border-radius:14px; box-shadow:0 6px 18px rgba(20,80,160,.12);}
+
+/* ---------- 分隔线 ---------- */
+hr{border-color:var(--ski-line)!important;}
+</style>
+"""
+st.markdown(ALPINE_THEME_CSS, unsafe_allow_html=True)
+
+# Hero 头图（替代默认 st.title）
+st.markdown("""
+<div class="ski-hero">
+  <h1>🏂 AI 二手雪板智能定价系统</h1>
+  <p>多模态视觉鉴定 · 智能估价 · 老炮儿在线咨询，像雪场宗师一样一眼识板。</p>
+  <div class="ski-chips">
+    <span>❄️ Qwen-VL 视觉鉴定</span>
+    <span>📊 智能定价引擎</span>
+    <span>💬 多轮对话咨询</span>
+    <span>⚡ 在线 Demo</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 with st.sidebar:
     st.title("🔧 配置")
@@ -72,28 +218,34 @@ LOADING_HTML = """
 <style>
     .loading-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; z-index: 99999;
+        background: linear-gradient(180deg, rgba(11,61,145,0.45), rgba(43,127,255,0.35)); backdrop-filter: blur(4px);
+        display: flex; justify-content: center; align-items: center; z-index: 99999;
     }
     .glass-card {
         position: relative; width: 35vw; min-width: 320px; max-width: 500px; padding: 40px 20px;
-        background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        display: flex; flex-direction: column; align-items: center; color: #ffffff; font-family: sans-serif; text-align: center;
+        background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(43, 127, 255, 0.25); border-radius: 22px; box-shadow: 0 24px 60px rgba(11, 61, 145, 0.35);
+        display: flex; flex-direction: column; align-items: center; color: #15324f; font-family: 'Inter', sans-serif; text-align: center;
     }
     .stage-container { position: relative; width: 270px; height: 370px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
     .center-obj { position: absolute; width: 110px; z-index: 10; content: url('https://raw.githubusercontent.com/XIAOHAY/Snowboard-AI-Pricing/main/img/snowboard.png'); }
     .orbit-container { position: absolute; width: 100%; height: 100%; z-index: 20; will-change: transform; transform: translateZ(0); animation: orbit-spin 5s linear infinite; }
     .dwarf-artisan { position: absolute; top: 15px; left: 50%; width: 80px; margin-left: -40px; will-change: transform; transform: translateZ(0); backface-visibility: hidden; animation: counter-spin 5s linear infinite; content: url('https://raw.githubusercontent.com/XIAOHAY/Snowboard-AI-Pricing/main/img/dwarf.png'); }
-    .loading-text { font-size: 1.4rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-    .sub-text { font-size: 0.9rem; color: #dddddd; line-height: 1.4; }
+    .loading-text { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; color: #0b3d91; }
+    .sub-text { font-size: 0.9rem; color: #5b7793; line-height: 1.4; }
+    .ski-progress { width: 70%; height: 6px; margin-top: 14px; border-radius: 999px; overflow: hidden; background: rgba(43,127,255,0.15); }
+    .ski-progress i { display:block; height:100%; width:40%; border-radius:999px;
+        background: linear-gradient(90deg, #2b7fff, #38bdf8); animation: ski-slide 1.4s ease-in-out infinite; }
     @keyframes orbit-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes counter-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+    @keyframes ski-slide { 0% { margin-left:-40%; } 100% { margin-left:100%; } }
 </style>
 <div class="loading-overlay">
     <div class="glass-card">
         <div class="stage-container"><img class="center-obj"><div class="orbit-container"><img class="dwarf-artisan"></div></div>
-        <div class="loading-text">⚒️ 宗师鉴定中...</div>
+        <div class="loading-text">❄️ 雪场宗师鉴定中...</div>
         <div class="sub-text">AI 正在进行多模态融合分析<br>请稍候片刻</div>
+        <div class="ski-progress"><i></i></div>
     </div>
 </div>
 """
