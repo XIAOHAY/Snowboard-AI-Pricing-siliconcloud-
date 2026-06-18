@@ -1,0 +1,14 @@
+# Streamlit 官方主题（稳定、跨版本安全）—— 阿尔卑斯·清爽蓝白
+# 这是“打底”：会原生统一所有控件（按钮/输入/侧栏/聊天/滑块/expander）的配色，
+# 不依赖会随版本变化的 CSS 类名。app_agent.py 里的 CSS 只负责 Hero 等增强。
+[theme]
+base = "light"
+primaryColor = "#2b7fff"               # 冰川蓝主色：按钮/滑块/选中态
+backgroundColor = "#f4f9ff"            # 雪白主背景
+secondaryBackgroundColor = "#e6f1ff"  # 侧栏/次级面板：冰蓝
+textColor = "#15324f"                 # 深海军蓝文字（对比度达标）
+font = "sans serif"
+
+[server]
+# 收起右上角“跑动”动画等装饰，让界面更干净（可选）
+runOnSave = false
