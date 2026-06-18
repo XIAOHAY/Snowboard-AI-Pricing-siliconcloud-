@@ -66,18 +66,41 @@ footer{visibility:hidden;}
 .overline{font-size:.78rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--c-primary-2);}
 h1,h2,h3,h4{color:var(--c-ink); letter-spacing:-.3px;}
 
-/* Hero */
-.hero{position:relative; overflow:hidden; border-radius:var(--r-xl); padding:32px 34px; margin-bottom:18px;
-  background:var(--c-glass-strong); border:1px solid rgba(255,255,255,.7); box-shadow:var(--sh-md); backdrop-filter:blur(14px);}
-.hero::after{content:""; position:absolute; right:-50px; top:-60px; width:240px; height:240px;
-  background:radial-gradient(circle, rgba(70,196,255,.25), rgba(70,196,255,0) 70%);}
-.hero .overline{display:block; margin-bottom:12px;}
-.hero h1{font-size:2.3rem; line-height:1.1; font-weight:900; margin:0 0 12px; letter-spacing:-.8px;}
+/* Hero（落地页式：左文案+CTA+数据，右浮层价格卡） */
+.hero{padding:28px 0 8px;}
+.hero-grid{display:grid; grid-template-columns:1.08fr .92fr; gap:42px; align-items:center;}
+.hero .overline{display:block; margin-bottom:14px;}
+.hero h1{font-size:2.9rem; line-height:1.08; font-weight:900; margin:0 0 16px; letter-spacing:-1.1px;}
 .hero h1 .grad{background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;}
-.hero p{font-size:1.02rem; color:var(--c-text); margin:0 0 16px; max-width:600px;}
-.hero .chips{display:flex; gap:8px; flex-wrap:wrap;}
-.hero .chips span{font-size:.76rem; font-weight:600; color:var(--c-primary-2); background:rgba(43,127,255,.1);
-  border:1px solid var(--c-line-soft); padding:6px 12px; border-radius:999px;}
+.hero .lead{font-size:1.08rem; line-height:1.6; color:var(--c-text); margin:0 0 24px; max-width:520px;}
+.hero-cta{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:26px;}
+.cta{display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-weight:700; font-size:.96rem; padding:12px 24px; border-radius:999px; transition:all .2s ease;}
+.cta.primary{background:var(--grad); color:#fff; box-shadow:0 12px 26px rgba(43,127,255,.34);}
+.cta.primary:hover{transform:translateY(-2px); box-shadow:0 18px 34px rgba(43,127,255,.46);}
+.cta.ghost{background:rgba(255,255,255,.7); color:var(--c-primary-2); border:1px solid var(--c-line);}
+.cta.ghost:hover{transform:translateY(-2px); box-shadow:var(--sh-sm);}
+.hero-stats{display:flex; gap:32px;}
+.hero-stats .num{font-size:1.55rem; font-weight:900; color:var(--c-ink); line-height:1;}
+.hero-stats .lab{font-size:.8rem; color:var(--c-muted); margin-top:6px;}
+.hero-card{position:relative; border-radius:var(--r-xl); padding:26px; background:var(--c-glass-strong); border:1px solid rgba(255,255,255,.7); box-shadow:var(--sh-lg); backdrop-filter:blur(16px);}
+.hc-top{display:flex; align-items:center; gap:12px; margin-bottom:18px;}
+.hc-emoji{width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; background:var(--grad-deep); box-shadow:0 8px 18px rgba(43,127,255,.34);}
+.hc-brand{font-weight:800; color:var(--c-ink); font-size:1.05rem;}
+.hc-sub{font-size:.8rem; color:var(--c-muted);}
+.hc-badge{margin-left:auto; font-size:.72rem; font-weight:700; color:#0a8a4a; background:rgba(16,185,90,.12); padding:5px 11px; border-radius:999px;}
+.hc-price{display:flex; align-items:baseline; gap:8px; margin:6px 0 4px;}
+.hc-price .cur{color:var(--c-muted); font-weight:700;}
+.hc-price .val{font-size:2.4rem; font-weight:900; color:var(--c-deep); letter-spacing:-1px;}
+.hc-range{font-size:.82rem; color:var(--c-muted); margin-bottom:16px;}
+.hc-bar{height:8px; border-radius:999px; background:rgba(43,127,255,.14); overflow:hidden;}
+.hc-bar i{display:block; height:100%; width:64%; border-radius:999px; background:var(--grad);}
+.hc-tags{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
+.hc-tags span{font-size:.74rem; color:var(--c-primary-2); background:rgba(43,127,255,.1); border:1px solid var(--c-line-soft); padding:5px 11px; border-radius:999px;}
+/* 居中分节标题 */
+.sec-head{text-align:center; max-width:660px; margin:30px auto 22px;}
+.sec-head .overline{display:block; margin-bottom:10px;}
+.sec-head h2{font-size:1.9rem; font-weight:900; margin:0 0 8px; color:var(--c-ink);}
+.sec-head p{color:var(--c-muted); font-size:1rem; margin:0;}
 
 /* 如何用 三步 */
 .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:8px 0 18px;}
@@ -133,7 +156,7 @@ h1,h2,h3,h4{color:var(--c-ink); letter-spacing:-.3px;}
 [data-testid="stImage"] img{border-radius:14px; box-shadow:var(--sh-sm);}
 hr{border-color:var(--c-line)!important;}
 
-@media(max-width:900px){.steps{grid-template-columns:1fr;} .hero h1{font-size:1.9rem;}}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;} .steps{grid-template-columns:1fr;} .hero h1{font-size:2.1rem;}}
 </style>
 """
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -156,10 +179,35 @@ with st.sidebar:
 # ==========================================
 st.markdown("""
 <div class="hero">
-  <span class="overline">AI Agent · 自主决策估价</span>
-  <h1>雪板老炮 · <span class="grad">AI 估价 Agent</span></h1>
-  <p>传图问"这块值多少"，或问品牌保值、保养选板 —— 我自己决定调用哪个工具来帮你，并实时展示用量与成本。</p>
-  <div class="chips"><span>🖼️ 多图融合鉴定</span><span>🧰 自主工具调用</span><span>📊 用量/成本可观测</span></div>
+  <div class="hero-grid">
+    <div>
+      <span class="overline">AI Agent · 多模态视觉鉴定</span>
+      <h1>一眼识板，<br><span class="grad">秒出二手雪板估价</span></h1>
+      <p class="lead">传图问"这块值多少"，AI 像雪场老炮儿一样识别品牌型号、判断成色损伤，给出可信价格区间，还能自主调用工具、多轮追问。</p>
+      <div class="hero-cta">
+        <a class="cta primary" href="#start">🚀 立即免费鉴定</a>
+        <a class="cta ghost" href="#how">了解工作原理</a>
+      </div>
+      <div class="hero-stats">
+        <div><div class="num">3 视图</div><div class="lab">多角度融合分析</div></div>
+        <div><div class="num">Qwen-VL</div><div class="lab">多模态大模型</div></div>
+        <div><div class="num">真实行情</div><div class="lab">闲鱼快照定价</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="hero-card">
+        <div class="hc-top">
+          <div class="hc-emoji">🏂</div>
+          <div><div class="hc-brand">BURTON · Custom</div><div class="hc-sub">成色评分 8.5 / 10</div></div>
+          <div class="hc-badge">保值神板</div>
+        </div>
+        <div class="hc-price"><span class="cur">¥</span><span class="val">1,650</span></div>
+        <div class="hc-range">建议区间 ¥1,280 — ¥2,020</div>
+        <div class="hc-bar"><i></i></div>
+        <div class="hc-tags"><span>板面无明显划痕</span><span>钢边完好</span><span>热门款</span></div>
+      </div>
+    </div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -181,6 +229,12 @@ if "executor" not in st.session_state:
 # ==========================================
 if not st.session_state.messages:
     st.markdown("""
+<div id="how"></div>
+<div class="sec-head">
+  <span class="overline">How it works</span>
+  <h2>三步，拿到专业估价</h2>
+  <p>无需任何雪板知识，跟着做就行。</p>
+</div>
 <div class="steps">
   <div class="step"><div class="no">1</div><h4>传图（可选）</h4><p>板面 / 板底 / 细节多张一起传，Agent 自动多视图融合。</p></div>
   <div class="step"><div class="no">2</div><h4>直接提问</h4><p>"这块值多少""Burton 保值吗""板底锈了怎么办"。</p></div>
@@ -191,6 +245,7 @@ if not st.session_state.messages:
 # ==========================================
 # 多图上传（逻辑未改，外观玻璃卡）
 # ==========================================
+st.markdown('<div id="start"></div>', unsafe_allow_html=True)
 with st.container(border=True):
     st.markdown(
         '<div class="card-head"><div class="ic">📤</div>'
