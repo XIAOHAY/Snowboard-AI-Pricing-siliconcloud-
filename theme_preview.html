@@ -3,141 +3,228 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>阿尔卑斯·清爽蓝白主题 — 视觉预览</title>
+<title>SnowAppraise · 落地页重做预览</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 :root{
-  --ski-sky:#eaf4ff; --ski-snow:#f8fbff; --ski-ice:#d6ecff;
-  --ski-primary:#2b7fff; --ski-primary-deep:#1466e6; --ski-deep:#0b3d91;
-  --ski-cyan:#38bdf8; --ski-text:#15324f; --ski-muted:#5b7793;
-  --ski-glass:rgba(255,255,255,.72); --ski-line:rgba(43,127,255,.16);
-  --ski-radius:18px; --ski-shadow:0 14px 40px rgba(20,80,160,.14);
+  --c-deep:#0a3a86; --c-primary:#2b7fff; --c-primary-2:#1466e6; --c-cyan:#46c4ff;
+  --c-ink:#0f2742; --c-text:#3a566f; --c-muted:#7690a8;
+  --c-line:rgba(20,80,160,.12); --c-line-soft:rgba(20,80,160,.07);
+  --c-glass:rgba(255,255,255,.62); --c-glass-strong:rgba(255,255,255,.82);
+  --grad:linear-gradient(120deg,var(--c-primary) 0%, var(--c-cyan) 100%);
+  --grad-deep:linear-gradient(125deg,#0a3a86 0%, #2b7fff 55%, #46c4ff 100%);
+  --r-sm:12px; --r-md:18px; --r-lg:26px; --r-xl:34px;
+  --sh-sm:0 4px 14px rgba(20,80,160,.08); --sh-md:0 14px 40px rgba(20,80,160,.14); --sh-lg:0 30px 70px rgba(11,61,145,.20);
 }
 *{box-sizing:border-box;}
-body{
-  margin:0; min-height:100vh; color:var(--ski-text);
-  font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+body{margin:0; color:var(--c-text); font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
   background:
-    radial-gradient(1100px 520px at 12% -8%, #ffffff 0%, rgba(255,255,255,0) 60%),
-    radial-gradient(900px 460px at 88% 0%, #dcefff 0%, rgba(220,239,255,0) 55%),
-    linear-gradient(180deg, var(--ski-sky) 0%, var(--ski-snow) 42%, #ffffff 100%);
-}
-body::before{
-  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
-  background-image:
-    radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 51%),
-    radial-gradient(2px 2px at 70% 18%, #fff 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 45% 60%, #cfe6ff 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 85% 70%, #fff 50%, transparent 51%);
-  background-size:600px 600px,500px 500px,400px 400px,450px 450px;
-}
-.wrap{max-width:980px; margin:0 auto; padding:32px 24px 60px; position:relative; z-index:1;}
-.note{font-size:.85rem;color:var(--ski-muted);margin:0 0 18px;}
+    radial-gradient(900px 480px at 85% -6%, rgba(70,196,255,.28) 0%, rgba(70,196,255,0) 60%),
+    radial-gradient(820px 460px at 8% 2%, rgba(43,127,255,.18) 0%, rgba(43,127,255,0) 58%),
+    linear-gradient(180deg,#eef6ff 0%, #f6fbff 40%, #ffffff 100%);}
+.wrap{max-width:1140px; margin:0 auto; padding:24px 22px 60px;}
+.note{font-size:.82rem;color:var(--c-muted);margin:0 0 8px;text-align:center;}
+.overline{font-size:.78rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--c-primary-2);}
+h1,h2,h3,h4{color:var(--c-ink); letter-spacing:-.3px; margin:0;}
 
 /* Hero */
-.ski-hero{position:relative; overflow:hidden; border-radius:24px; padding:30px 34px;
-  background:linear-gradient(120deg,var(--ski-deep) 0%, var(--ski-primary) 55%, var(--ski-cyan) 100%);
-  box-shadow:var(--ski-shadow); margin-bottom:22px;}
-.ski-hero::after{content:""; position:absolute; right:-40px; bottom:-60px; width:280px; height:280px;
-  background:radial-gradient(circle, rgba(255,255,255,.30) 0%, rgba(255,255,255,0) 70%);}
-.ski-hero h1{margin:0; color:#fff; font-weight:800; font-size:2rem; letter-spacing:.5px; text-shadow:0 2px 10px rgba(0,0,0,.18);}
-.ski-hero p{margin:.5rem 0 0; color:#eaf4ff;}
-.ski-chips{margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;}
-.ski-chips span{background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
-  color:#fff; font-size:.78rem; padding:5px 12px; border-radius:999px;}
+.hero{padding:36px 0 18px;}
+.hero-grid{display:grid; grid-template-columns:1.08fr .92fr; gap:46px; align-items:center;}
+.hero .overline{margin-bottom:14px; display:block;}
+.hero h1{font-size:3.1rem; line-height:1.08; font-weight:900; margin:0 0 16px; letter-spacing:-1.2px;}
+.hero h1 .grad{background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.hero .lead{font-size:1.14rem; line-height:1.6; margin:0 0 26px; max-width:520px;}
+.hero-cta{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:30px;}
+.cta{display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-weight:700; font-size:.98rem; padding:13px 26px; border-radius:999px;}
+.cta.primary{background:var(--grad); color:#fff; box-shadow:0 12px 26px rgba(43,127,255,.34);}
+.cta.ghost{background:rgba(255,255,255,.7); color:var(--c-primary-2); border:1px solid var(--c-line);}
+.hero-stats{display:flex; gap:34px;}
+.hero-stats .num{font-size:1.7rem; font-weight:900; color:var(--c-ink); line-height:1;}
+.hero-stats .lab{font-size:.8rem; color:var(--c-muted); margin-top:6px;}
+.hero-card{position:relative; border-radius:var(--r-xl); padding:26px; background:var(--c-glass-strong); border:1px solid rgba(255,255,255,.7); box-shadow:var(--sh-lg); backdrop-filter:blur(16px);}
+.hc-top{display:flex; align-items:center; gap:12px; margin-bottom:18px;}
+.hc-emoji{width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; background:var(--grad-deep); box-shadow:0 8px 18px rgba(43,127,255,.34);}
+.hc-brand{font-weight:800; color:var(--c-ink); font-size:1.05rem;}
+.hc-sub{font-size:.8rem; color:var(--c-muted);}
+.hc-badge{margin-left:auto; font-size:.72rem; font-weight:700; color:#0a8a4a; background:rgba(16,185,90,.12); padding:5px 11px; border-radius:999px;}
+.hc-price{display:flex; align-items:baseline; gap:8px; margin:6px 0 4px;}
+.hc-price .cur{color:var(--c-muted); font-weight:700;}
+.hc-price .val{font-size:2.4rem; font-weight:900; color:var(--c-deep); letter-spacing:-1px;}
+.hc-range{font-size:.82rem; color:var(--c-muted); margin-bottom:16px;}
+.hc-bar{height:8px; border-radius:999px; background:rgba(43,127,255,.14); overflow:hidden;}
+.hc-bar i{display:block; height:100%; width:64%; border-radius:999px; background:var(--grad);}
+.hc-tags{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
+.hc-tags span{font-size:.74rem; color:var(--c-primary-2); background:rgba(43,127,255,.1); border:1px solid var(--c-line-soft); padding:5px 11px; border-radius:999px;}
 
-h3{color:var(--ski-deep); font-weight:800;}
-.cols{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
-.card{background:var(--ski-glass); backdrop-filter:blur(8px); border:1px solid var(--ski-line);
-  border-radius:var(--ski-radius); padding:18px 20px; box-shadow:var(--ski-shadow);}
-.dropzone{background:rgba(255,255,255,.6); border:1.5px dashed var(--ski-primary);
-  border-radius:var(--ski-radius); padding:26px; text-align:center; color:var(--ski-muted); margin-top:10px;}
-.btn{display:inline-block; border-radius:999px; font-weight:700; padding:10px 22px; cursor:pointer; border:none;
-  background:linear-gradient(120deg,var(--ski-primary) 0%, var(--ski-cyan) 100%); color:#fff;
-  box-shadow:0 8px 18px rgba(43,127,255,.30); margin-top:12px;}
-.btn.ghost{background:rgba(255,255,255,.85); color:var(--ski-primary-deep); border:1px solid var(--ski-line); box-shadow:0 4px 14px rgba(20,80,160,.08);}
-.demo-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--ski-line);}
-.thumb{width:64px;height:44px;border-radius:10px;background:linear-gradient(135deg,#cfe6ff,#9cc6ff);box-shadow:0 4px 10px rgba(20,80,160,.18);}
+/* sections */
+.section{margin:58px 0 10px;}
+.sec-head{text-align:center; max-width:660px; margin:0 auto 34px;}
+.sec-head .overline{margin-bottom:10px; display:block;}
+.sec-head h2{font-size:2.05rem; font-weight:900; margin:0 0 10px;}
+.sec-head p{color:var(--c-muted); font-size:1rem; margin:0;}
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+.step{padding:26px 22px; border-radius:var(--r-lg); background:var(--c-glass); border:1px solid var(--c-line-soft); box-shadow:var(--sh-sm); backdrop-filter:blur(10px);}
+.step .no{width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; background:var(--grad); box-shadow:0 8px 16px rgba(43,127,255,.3); margin-bottom:14px;}
+.step h4{margin:0 0 6px; font-size:1.08rem;}
+.step p{margin:0; font-size:.9rem; color:var(--c-muted); line-height:1.55;}
+.features{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:18px;}
+.feat{display:flex; gap:14px; padding:20px; border-radius:var(--r-md); background:var(--c-glass); border:1px solid var(--c-line-soft); box-shadow:var(--sh-sm); backdrop-filter:blur(10px);}
+.feat .ic{flex:0 0 auto; width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; background:rgba(43,127,255,.1);}
+.feat h4{margin:0 0 4px; font-size:1.02rem;}
+.feat p{margin:0; font-size:.88rem; color:var(--c-muted); line-height:1.55;}
 
-/* metrics */
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0;}
-.metric{background:var(--ski-glass);backdrop-filter:blur(8px);border:1px solid var(--ski-line);
-  border-radius:var(--ski-radius);padding:16px 18px;box-shadow:var(--ski-shadow);}
-.metric .label{color:var(--ski-muted);font-size:.85rem;}
-.metric .value{color:var(--ski-deep);font-weight:800;font-size:1.7rem;margin-top:4px;}
-.alert{background:rgba(214,236,255,.55);border:1px solid var(--ski-line);border-radius:14px;padding:12px 16px;margin:8px 0;}
-.alert.ok{background:rgba(209,250,229,.5);}
-.chat{background:var(--ski-glass);border:1px solid var(--ski-line);border-radius:16px;padding:12px 16px;margin:8px 0;box-shadow:0 4px 14px rgba(20,80,160,.06);}
+/* tool cards */
+.tool{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+.card{background:var(--c-glass-strong); border:1px solid var(--c-line); border-radius:var(--r-lg); box-shadow:var(--sh-md); backdrop-filter:blur(12px); padding:22px;}
+.card-head{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+.card-head .ic{width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; color:#fff; background:var(--grad); box-shadow:0 8px 16px rgba(43,127,255,.3);}
+.card-head .tt{font-weight:800; color:var(--c-ink); font-size:1.1rem;}
+.card-head .ds{font-size:.82rem; color:var(--c-muted);}
+.field{font-size:.85rem;color:var(--c-muted);margin:10px 0 4px;}
+.input{background:rgba(255,255,255,.85);border:1px solid var(--c-line);border-radius:12px;padding:10px 12px;color:var(--c-muted);}
+.dropzone{background:rgba(240,247,255,.7); border:1.6px dashed var(--c-primary); border-radius:var(--r-md); padding:26px; text-align:center; color:var(--c-muted); margin-top:6px;}
+.btn{display:block;width:100%;text-align:center; border-radius:999px; font-weight:700; padding:12px; cursor:pointer; border:none; background:var(--grad); color:#fff; box-shadow:0 10px 22px rgba(43,127,255,.32); margin-top:14px;}
+.btn.ghost{background:rgba(255,255,255,.85); color:var(--c-primary-2); border:1px solid var(--c-line); box-shadow:var(--sh-sm);}
+.demo-row{display:flex; align-items:center; gap:12px; padding:10px 0;}
+.thumb{width:70px;height:48px;border-radius:10px;background:linear-gradient(135deg,#cfe6ff,#9cc6ff);box-shadow:0 4px 10px rgba(20,80,160,.18);flex:0 0 auto;}
 
-/* loading card */
-.loading-stage{display:flex;justify-content:center;margin-top:26px;}
-.glass-card{width:340px;padding:30px 20px;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);
-  border:1px solid rgba(43,127,255,.25);border-radius:22px;box-shadow:0 24px 60px rgba(11,61,145,.35);
-  text-align:center;}
-.loading-text{font-size:1.3rem;font-weight:800;color:#0b3d91;margin-bottom:6px;}
-.sub-text{font-size:.85rem;color:#5b7793;}
-.ski-progress{width:70%;height:6px;margin:16px auto 0;border-radius:999px;overflow:hidden;background:rgba(43,127,255,.15);}
-.ski-progress i{display:block;height:100%;width:40%;border-radius:999px;
-  background:linear-gradient(90deg,#2b7fff,#38bdf8);animation:ski-slide 1.4s ease-in-out infinite;}
-.spin{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;border:5px solid rgba(43,127,255,.18);
-  border-top-color:#2b7fff;animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-@keyframes ski-slide{0%{margin-left:-40%;}100%{margin-left:100%;}}
-.tag{display:inline-block;font-size:.72rem;color:var(--ski-primary-deep);background:rgba(43,127,255,.1);
-  padding:3px 10px;border-radius:999px;margin-bottom:6px;}
+/* result */
+.result-hero{position:relative; overflow:hidden; border-radius:var(--r-lg); padding:24px 28px; margin-bottom:16px; background:var(--grad-deep); box-shadow:var(--sh-lg);}
+.rh-row{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+.rh-emoji{width:56px; height:56px; border-radius:16px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); display:flex; align-items:center; justify-content:center; font-size:28px;}
+.rh-brand{color:#fff; font-weight:900; font-size:1.5rem; line-height:1.1;}
+.rh-model{color:#dbeaff; font-size:.9rem; margin-top:2px;}
+.rh-score{margin-left:auto; text-align:center; color:#fff;}
+.rh-score .v{font-size:2rem; font-weight:900; line-height:1;}
+.rh-score .l{font-size:.74rem; color:#cfe3ff; letter-spacing:1px;}
+.price-panel{display:grid; grid-template-columns:1fr 1.25fr 1fr; gap:14px; margin:6px 0 14px;}
+.price-card{border-radius:var(--r-md); padding:20px 18px; text-align:center; background:var(--c-glass-strong); border:1px solid var(--c-line); box-shadow:var(--sh-sm); backdrop-filter:blur(10px);}
+.price-card .l{font-size:.82rem; color:var(--c-muted); margin-bottom:8px;}
+.price-card .v{font-size:1.7rem; font-weight:800; color:var(--c-ink);}
+.price-card .cur{color:var(--c-muted);}
+.price-card.main{background:var(--grad-deep); border:none; box-shadow:0 18px 40px rgba(43,127,255,.36); transform:translateY(-4px);}
+.price-card.main .l{color:#cfe3ff;} .price-card.main .v{color:#fff; font-size:2.2rem;} .price-card.main .cur{color:#cfe3ff;}
+.review{position:relative; border-radius:var(--r-md); padding:22px 24px 22px 56px; background:var(--c-glass-strong); border:1px solid var(--c-line); box-shadow:var(--sh-sm);}
+.review::before{content:"\201C"; position:absolute; left:18px; top:6px; font-size:54px; line-height:1; font-weight:900; color:var(--c-primary); opacity:.5; font-family:Georgia,serif;}
+.review .who{font-weight:800; color:var(--c-primary-2); font-size:.86rem; margin-bottom:6px;}
+.review .txt{color:var(--c-text); line-height:1.65;}
+.subhead{display:flex; align-items:center; gap:10px; margin:22px 0 12px; font-weight:800; color:var(--c-ink); font-size:1.12rem;}
+.subhead .bar{width:4px; height:18px; border-radius:2px; background:var(--grad);}
+.foot{margin-top:50px; padding:24px 4px 6px; border-top:1px solid var(--c-line); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;}
+.foot .b{font-weight:900; color:var(--c-ink);} .foot .s{font-size:.84rem; color:var(--c-muted);} .foot a{color:var(--c-primary-2); text-decoration:none;}
+.divider{height:1px;background:var(--c-line);margin:46px 0;}
+.statebadge{display:inline-block;background:rgba(43,127,255,.1);color:var(--c-primary-2);font-size:.72rem;font-weight:700;padding:4px 12px;border-radius:999px;border:1px solid var(--c-line-soft);}
+@media(max-width:900px){.hero-grid,.steps,.features,.tool,.price-panel{grid-template-columns:1fr;} .hero h1{font-size:2.3rem;}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <p class="note">📐 这是 Streamlit 应用 <b>app_ui_deploy.py</b> 套用「阿尔卑斯·清爽蓝白」皮肤后的静态视觉预览（HTML 模拟，真实页面由 Streamlit 渲染，效果一致）。</p>
+  <p class="note">📐 这是 Streamlit 应用 <b>app_ui_deploy.py</b> 重做后的静态视觉预览（真实页面由 Streamlit 渲染，结构与配色一致）。下方依次展示：落地页 → 工具区 → 结果页。</p>
 
-  <div class="ski-hero">
-    <h1>🏂 AI 二手雪板智能定价系统</h1>
-    <p>多模态视觉鉴定 · 智能估价 · 老炮儿在线咨询，像雪场宗师一样一眼识板。</p>
-    <div class="ski-chips">
-      <span>❄️ Qwen-VL 视觉鉴定</span>
-      <span>📊 智能定价引擎</span>
-      <span>💬 多轮对话咨询</span>
-      <span>⚡ 在线 Demo</span>
+  <!-- ===== 落地页状态 ===== -->
+  <div style="text-align:center;margin:8px 0 18px;"><span class="statebadge">STATE A · 落地页（未鉴定）</span></div>
+
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <span class="overline">AI · 多模态视觉鉴定</span>
+        <h1>一眼识板，<br><span class="grad">秒出二手雪板估价</span></h1>
+        <p class="lead">上传几张照片，AI 像雪场老炮儿一样识别品牌型号、判断成色损伤，并给出可信价格区间与专家点评，还能多轮追问。</p>
+        <div class="hero-cta">
+          <a class="cta primary" href="#">🚀 立即免费鉴定</a>
+          <a class="cta ghost" href="#">了解工作原理</a>
+        </div>
+        <div class="hero-stats">
+          <div><div class="num">3 视图</div><div class="lab">多角度融合分析</div></div>
+          <div><div class="num">Qwen-VL</div><div class="lab">多模态大模型</div></div>
+          <div><div class="num">真实行情</div><div class="lab">闲鱼快照定价</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="hero-card">
+          <div class="hc-top">
+            <div class="hc-emoji">🏂</div>
+            <div><div class="hc-brand">BURTON · Custom</div><div class="hc-sub">成色评分 8.5 / 10</div></div>
+            <div class="hc-badge">保值神板</div>
+          </div>
+          <div class="hc-price"><span class="cur">¥</span><span class="val">1,650</span></div>
+          <div class="hc-range">建议区间 ¥1,280 — ¥2,020</div>
+          <div class="hc-bar"><i></i></div>
+          <div class="hc-tags"><span>板面无明显划痕</span><span>钢边完好</span><span>热门款</span></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="cols">
-    <div class="card">
-      <h3>📤 上传照片</h3>
-      <div style="color:var(--ski-muted);font-size:.85rem;">已有照片？直接上传体验 AI 鉴定。</div>
-      <div class="dropzone">⬆️ 点击或拖拽上传图片<br><span style="font-size:.8rem;">JPG / PNG · 支持多图</span></div>
-      <button class="btn">🚀 开始分析</button>
-    </div>
-    <div class="card">
-      <h3>⚡️ 一键体验</h3>
-      <div style="color:var(--ski-muted);font-size:.85rem;">没有照片？点击案例体验多视图融合分析。</div>
-      <div class="demo-row"><div class="thumb"></div><div><b>热门准新款</b></div><button class="btn ghost" style="margin-left:auto;margin-top:0;">✨ 保值神板</button></div>
-      <div class="demo-row"><div class="thumb"></div><div><b>板底严重划痕</b></div><button class="btn ghost" style="margin-left:auto;margin-top:0;">🥊 识别损伤</button></div>
-      <div class="demo-row" style="border:none;"><div class="thumb"></div><div><b>老牌保值款</b></div><button class="btn ghost" style="margin-left:auto;margin-top:0;">🔍 日系经典</button></div>
+  <div class="section">
+    <div class="sec-head"><span class="overline">How it works</span><h2>三步，拿到专业估价</h2><p>无需任何雪板知识，跟着做就行。</p></div>
+    <div class="steps">
+      <div class="step"><div class="no">1</div><h4>上传多视图照片</h4><p>板面、板底、钢边各来一张，多角度让 AI 看得更准。没有照片也能点演示案例。</p></div>
+      <div class="step"><div class="no">2</div><h4>AI 多模态鉴定</h4><p>Qwen-VL 识别品牌型号、判断成色与损伤，多图投票融合，降低单图误判。</p></div>
+      <div class="step"><div class="no">3</div><h4>估价 + 专家咨询</h4><p>定价引擎结合真实行情给出价格区间与点评，还能继续追问"能再高点吗"。</p></div>
     </div>
   </div>
 
-  <div class="loading-stage">
-    <div class="glass-card">
-      <div class="tag">LOADING 加载态</div>
-      <div class="spin"></div>
-      <div class="loading-text">❄️ 雪场宗师鉴定中...</div>
-      <div class="sub-text">AI 正在进行多模态融合分析，请稍候片刻</div>
-      <div class="ski-progress"><i></i></div>
+  <div class="section">
+    <div class="sec-head"><span class="overline">Why SnowAppraise</span><h2>不止给个数字</h2><p>像懂行的朋友帮你把关。</p></div>
+    <div class="features">
+      <div class="feat"><div class="ic">🧠</div><div><h4>多模态视觉理解</h4><p>看图识别品牌、型号、成色与损伤位置，而非简单关键词匹配。</p></div></div>
+      <div class="feat"><div class="ic">📊</div><div><h4>真实行情定价</h4><p>规则引擎叠加闲鱼真实成交快照，给出可解释的价格区间。</p></div></div>
+      <div class="feat"><div class="ic">🛠️</div><div><h4>可人工纠错</h4><p>识别有偏差？手动修正品牌/型号/成色，一键重新估价。</p></div></div>
+      <div class="feat"><div class="ic">💬</div><div><h4>老炮儿对话</h4><p>对结果有疑问，随时多轮追问，像和雪场老手聊天。</p></div></div>
     </div>
   </div>
 
-  <h3 style="margin-top:30px;">✅ 鉴定结果（看板）</h3>
-  <div class="metrics">
-    <div class="metric"><div class="label">📉 最低</div><div class="value">¥1,280</div></div>
-    <div class="metric"><div class="label">🏷️ 均价</div><div class="value">¥1,650</div></div>
-    <div class="metric"><div class="label">📈 最高</div><div class="value">¥2,020</div></div>
+  <div class="section">
+    <div class="sec-head"><span class="overline">Start now</span><h2>开始鉴定</h2><p>上传你的照片，或一键体验演示案例。</p></div>
+    <div class="tool">
+      <div class="card">
+        <div class="card-head"><div class="ic">📤</div><div><div class="tt">上传照片</div><div class="ds">已有照片？直接上传体验 AI 鉴定</div></div></div>
+        <div class="field">💡 (选填) 线索提示</div><div class="input">例如：Gray Desperado...</div>
+        <div class="dropzone">⬆️ 点击或拖拽上传（板面 / 板底 / 钢边）<br><span style="font-size:.8rem;">JPG / PNG · 支持多图</span></div>
+        <div class="btn">🚀 开始分析</div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="ic">⚡️</div><div><div class="tt">一键体验</div><div class="ds">没有照片？点击案例体验多视图融合分析</div></div></div>
+        <div class="demo-row"><div class="thumb"></div><div><b>热门准新款</b><div style="font-size:.8rem;color:var(--c-muted);">BURTON 龙年限定</div></div></div>
+        <div class="btn ghost">✨ 挑战：热门保值神板</div>
+        <div class="demo-row"><div class="thumb"></div><div><b>板底严重划痕</b><div style="font-size:.8rem;color:var(--c-muted);">多角度损伤</div></div></div>
+        <div class="btn ghost">🥊 挑战：识别严重损伤</div>
+        <div class="demo-row"><div class="thumb"></div><div><b>老牌保值款</b><div style="font-size:.8rem;color:var(--c-muted);">日系经典 OGASAKA</div></div></div>
+        <div class="btn ghost">🔍 鉴定日系经典</div>
+      </div>
+    </div>
   </div>
-  <div class="alert ok">✅ 鉴定完成 · 品牌锁定 <code>BURTON</code> · 成色 <code>8.5</code></div>
-  <div class="alert">🗣️ <b>专家点评</b>：这块板成色不错，热门保值款，按当前市场行情属于抢手货，价格坚挺。</div>
-  <div class="chat">👤 这个估价能再高点吗？</div>
-  <div class="chat">🤖 老炮儿：板型保值，如果配件齐全、近期雪季，挂 1900 也有人接。</div>
+
+  <div class="divider"></div>
+
+  <!-- ===== 结果页状态 ===== -->
+  <div style="text-align:center;margin:8px 0 18px;"><span class="statebadge">STATE B · 结果页（鉴定完成）</span></div>
+
+  <div class="result-hero">
+    <div class="rh-row">
+      <div class="rh-emoji">🏂</div>
+      <div><div class="rh-brand">BURTON</div><div class="rh-model">Good Company 龙年限定</div></div>
+      <div class="rh-score"><div class="v">8.5</div><div class="l">成色 / 10</div></div>
+    </div>
+  </div>
+  <div class="price-panel">
+    <div class="price-card"><div class="l">📉 最低估价</div><div class="v"><span class="cur">¥</span>1280</div></div>
+    <div class="price-card main"><div class="l">🏷️ 建议成交价</div><div class="v"><span class="cur">¥</span>1650</div></div>
+    <div class="price-card"><div class="l">📈 最高估价</div><div class="v"><span class="cur">¥</span>2020</div></div>
+  </div>
+  <div class="review"><div class="who">🗣️ 雪场老炮儿点评</div><div class="txt">这块板成色不错，热门保值款，板面无明显划痕、钢边完好。按当前雪季行情属于抢手货，价格坚挺，配件齐全的话挂 1900 也有人接。</div></div>
+  <div class="subhead"><span class="bar"></span>分析底图</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+    <div class="thumb" style="width:100%;height:120px;border-radius:14px;"></div>
+    <div class="thumb" style="width:100%;height:120px;border-radius:14px;"></div>
+    <div class="thumb" style="width:100%;height:120px;border-radius:14px;"></div>
+  </div>
+  <div class="subhead"><span class="bar"></span>咨询专家</div>
+  <div class="card" style="padding:14px 18px;margin-bottom:10px;">👤 这个估价能再高点吗？</div>
+  <div class="card" style="padding:14px 18px;">🤖 老炮儿：板型保值，配件齐全、近期雪季的话，挂 1900 也有人接。</div>
+
+  <div class="foot"><div><span class="b">🏂 SnowAppraise</span> <span class="s">AI 二手雪板智能定价系统</span></div><div class="s">Qwen-VL · LangChain · SiliconFlow · Streamlit | <a href="#">GitHub @XIAOHAY</a></div></div>
 </div>
 </body>
 </html>
