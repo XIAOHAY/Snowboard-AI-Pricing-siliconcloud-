@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雪板老炮 Agent · 重做预览</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+:root{--c-deep:#0a3a86;--c-primary:#2b7fff;--c-primary-2:#1466e6;--c-cyan:#46c4ff;--c-ink:#0f2742;--c-text:#3a566f;--c-muted:#7690a8;
+--c-line:rgba(20,80,160,.12);--c-line-soft:rgba(20,80,160,.07);--c-glass:rgba(255,255,255,.62);--c-glass-strong:rgba(255,255,255,.82);
+--grad:linear-gradient(120deg,var(--c-primary),var(--c-cyan));--grad-deep:linear-gradient(125deg,#0a3a86,#2b7fff 55%,#46c4ff);
+--r-md:18px;--r-lg:26px;--r-xl:34px;--sh-sm:0 4px 14px rgba(20,80,160,.08);--sh-md:0 14px 40px rgba(20,80,160,.14);--sh-lg:0 30px 70px rgba(11,61,145,.20);}
+*{box-sizing:border-box;}
+body{margin:0;color:var(--c-text);font-family:'Inter','PingFang SC','Microsoft YaHei',sans-serif;
+background:radial-gradient(900px 480px at 85% -6%,rgba(70,196,255,.28),rgba(70,196,255,0) 60%),radial-gradient(820px 460px at 8% 2%,rgba(43,127,255,.18),rgba(43,127,255,0) 58%),linear-gradient(180deg,#eef6ff,#f6fbff 40%,#fff);}
+.layout{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+.side{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(231,243,255,.9));border-right:1px solid var(--c-line);padding:22px 18px;}
+.side h3{color:var(--c-deep);margin:0 0 14px;font-size:1rem;}
+.tier{background:rgba(255,255,255,.7);border:1px solid var(--c-line);border-radius:14px;padding:9px 12px;margin-bottom:8px;font-size:.9rem;}
+.tier.active{background:var(--grad);color:#fff;border:none;box-shadow:0 8px 16px rgba(43,127,255,.3);}
+.side .mini{font-size:.74rem;color:var(--c-muted);margin-top:10px;}
+.main{max-width:900px;margin:0 auto;padding:24px 22px 40px;width:100%;}
+.overline{font-size:.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--c-primary-2);display:block;margin-bottom:12px;}
+.hero{position:relative;overflow:hidden;border-radius:var(--r-xl);padding:30px 32px;margin-bottom:18px;background:var(--c-glass-strong);border:1px solid rgba(255,255,255,.7);box-shadow:var(--sh-md);}
+.hero::after{content:"";position:absolute;right:-50px;top:-60px;width:240px;height:240px;background:radial-gradient(circle,rgba(70,196,255,.25),rgba(70,196,255,0) 70%);}
+.hero h1{font-size:2.3rem;line-height:1.1;font-weight:900;margin:0 0 12px;letter-spacing:-.8px;color:var(--c-ink);}
+.hero h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero p{font-size:1.02rem;margin:0 0 16px;max-width:600px;}
+.chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chips span{font-size:.76rem;font-weight:600;color:var(--c-primary-2);background:rgba(43,127,255,.1);border:1px solid var(--c-line-soft);padding:6px 12px;border-radius:999px;}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:8px 0 18px;}
+.step{padding:18px;border-radius:var(--r-md);background:var(--c-glass);border:1px solid var(--c-line-soft);box-shadow:var(--sh-sm);}
+.step .no{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;background:var(--grad);box-shadow:0 8px 16px rgba(43,127,255,.3);margin-bottom:10px;}
+.step h4{margin:0 0 4px;font-size:1rem;color:var(--c-ink);}.step p{margin:0;font-size:.85rem;color:var(--c-muted);line-height:1.5;}
+.card{background:var(--c-glass-strong);border:1px solid var(--c-line);border-radius:var(--r-lg);box-shadow:var(--sh-md);padding:18px;margin-bottom:16px;}
+.card-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.card-head .ic{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff;background:var(--grad);box-shadow:0 8px 16px rgba(43,127,255,.3);}
+.card-head .tt{font-weight:800;color:var(--c-ink);font-size:1.05rem;}.card-head .ds{font-size:.82rem;color:var(--c-muted);}
+.dropzone{background:rgba(240,247,255,.7);border:1.6px dashed var(--c-primary);border-radius:var(--r-md);padding:24px;text-align:center;color:var(--c-muted);}
+.asks{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 18px;}
+.asks span{font-size:.86rem;color:var(--c-text);background:var(--c-glass-strong);border:1px solid var(--c-line);padding:9px 15px;border-radius:999px;box-shadow:var(--sh-sm);}
+.bubble{border-radius:18px;border:1px solid var(--c-line-soft);background:var(--c-glass);box-shadow:var(--sh-sm);padding:14px 18px;margin-bottom:10px;}
+.bubble.me{background:rgba(43,127,255,.08);}
+.usage{border:1px solid var(--c-line);border-radius:var(--r-md);background:var(--c-glass);box-shadow:var(--sh-sm);padding:12px 16px;font-size:.84rem;color:var(--c-muted);margin-bottom:14px;}
+.inputbar{position:sticky;bottom:0;background:var(--c-glass-strong);border:1px solid var(--c-line);border-radius:18px;box-shadow:var(--sh-md);padding:14px 18px;color:var(--c-muted);}
+.note{font-size:.82rem;color:var(--c-muted);text-align:center;margin:0 0 14px;}
+@media(max-width:820px){.layout{grid-template-columns:1fr;}.side{display:none;}.steps{grid-template-columns:1fr;}}
+</style></head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <h3>⚙️ 模型档位</h3>
+    <div class="tier">经济档 · 省钱量大</div>
+    <div class="tier active">标准档 · 均衡（默认）</div>
+    <div class="tier">旗舰档 · 最强识别</div>
+    <div class="mini">👁️ 视觉 Qwen3-VL-32B<br>🧠 文本 Qwen3.5-27B</div>
+  </aside>
+  <main class="main">
+    <p class="note">📐 Agent 版 <b>agent/app_agent.py</b> 重做后的静态预览（真实页面由 Streamlit 渲染）。</p>
+    <div class="hero">
+      <span class="overline">AI Agent · 自主决策估价</span>
+      <h1>雪板老炮 · <span class="grad">AI 估价 Agent</span></h1>
+      <p>传图问"这块值多少"，或问品牌保值、保养选板 —— 我自己决定调用哪个工具来帮你，并实时展示用量与成本。</p>
+      <div class="chips"><span>🖼️ 多图融合鉴定</span><span>🧰 自主工具调用</span><span>📊 用量/成本可观测</span></div>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="no">1</div><h4>传图（可选）</h4><p>板面 / 板底 / 细节多张一起传，Agent 自动多视图融合。</p></div>
+      <div class="step"><div class="no">2</div><h4>直接提问</h4><p>"这块值多少""Burton 保值吗""板底锈了怎么办"。</p></div>
+      <div class="step"><div class="no">3</div><h4>Agent 自主作答</h4><p>它自己决定看图/查行情/给保养建议，并展示用量。</p></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="ic">📤</div><div><div class="tt">上传雪板图片</div><div class="ds">可多张：板面 / 板底 / 细节，自动融合分析</div></div></div>
+      <div class="dropzone">⬆️ 点击或拖拽上传<br><span style="font-size:.8rem;">JPG / PNG · 支持多图</span></div>
+    </div>
+    <div class="asks"><span>💰 这块板值多少？</span><span>📈 Burton 保值吗？</span><span>🛠️ 板底锈了怎么办？</span><span>🎯 新手选什么板型？</span></div>
+    <div class="bubble me">👤 这块 Burton 值多少？</div>
+    <div class="bubble">🤖 老炮儿：看图是 Burton Custom，成色 8.5，热门保值款。当前雪季行情建议 ¥1280–¥2020，挂 1650 比较稳。</div>
+    <div class="usage">📊 本次调用：2 次 · 3,420 tokens · ≈¥0.0125（估算）</div>
+    <div class="inputbar">例如：这块板值多少 / Burton 保值吗 / 板底锈了怎么办　▷</div>
+  </main>
+</div>
+</body></html>
