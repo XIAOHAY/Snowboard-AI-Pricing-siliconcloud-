@@ -572,6 +572,7 @@ if not st.session_state.current_data:
                     except Exception as e:
                         loading_placeholder.empty()
                         st.error(f"运行出错: {e}")
+                        st.exception(e)  # 临时：把完整 traceback 显示出来，定位线上根因
                 else:
                     st.warning("请先上传至少一张图片")
 
@@ -660,6 +661,7 @@ if not st.session_state.current_data:
                 except Exception as e:
                     loading_placeholder.empty()
                     st.error(f"演示运行失败: {e}")
+                    st.exception(e)  # 临时：把完整 traceback 显示出来，定位线上根因
 
             for key, cfg in DEMO_CASES.items():
                 cover_img = cfg["paths"][0]
