@@ -525,7 +525,10 @@ if not st.session_state.current_data:
                     try:
                         analysis_results = []
                         uploaded_images_bytes = []
-                        for uploaded_file in uploaded_files:
+                        _n = max(len(uploaded_files), 1)
+                        # 进度条：每张图后推一次更新，保持 websocket 活跃，避免云端长任务空闲掉线丢结果
+                        _prog = st.progress(0.0, text="正在多视图融合分析...")
+                        for _i, uploaded_file in enumerate(uploaded_files):
                             # 先压缩再用：送模型 + 存 session_state 都用压缩后的小图，省内存
                             file_bytes = _downscale_image(uploaded_file.read())
                             uploaded_images_bytes.append(file_bytes)
@@ -537,8 +540,10 @@ if not st.session_state.current_data:
                                 analysis_results.append(res)
                             finally:
                                 os.remove(temp_path)
+                            _prog.progress((_i + 1) / _n, text=f"已分析 {_i + 1}/{_n} 张...")
 
                         if analysis_results:
+                            _prog.progress(0.92, text="结合行情定价、生成专家点评...")
                             final_analysis = merge_analysis_results(analysis_results)
                             price_result = estimate_secondhand_price(final_analysis)
                             p_low = price_result.get("price_low", 0)
@@ -620,14 +625,19 @@ if not st.session_state.current_data:
                 loading_placeholder.markdown(LOADING_HTML, unsafe_allow_html=True)
                 try:
                     analysis_results = []
-                    for img_path in image_paths:
-                        if os.path.exists(img_path):
-                            res = analyze_snowboard_image(img_path, user_hint=cfg["hint"])
-                            res["brand"] = cfg["force_brand"]
-                            res["possible_model"] = cfg["force_model"]
-                            analysis_results.append(res)
+                    _imgs = [p for p in image_paths if os.path.exists(p)]
+                    _n = max(len(_imgs), 1)
+                    # 进度条：每张图后推一次更新，保持 websocket 活跃，避免云端长任务空闲掉线丢结果
+                    _prog = st.progress(0.0, text="正在多视图融合分析...")
+                    for _i, img_path in enumerate(_imgs):
+                        res = analyze_snowboard_image(img_path, user_hint=cfg["hint"])
+                        res["brand"] = cfg["force_brand"]
+                        res["possible_model"] = cfg["force_model"]
+                        analysis_results.append(res)
+                        _prog.progress((_i + 1) / _n, text=f"已分析 {_i + 1}/{_n} 张视图...")
 
                     if analysis_results:
+                        _prog.progress(0.92, text="结合行情定价、生成专家点评...")
                         final_analysis = merge_analysis_results(analysis_results)
                         price_result = estimate_secondhand_price(final_analysis)
                         p_low = price_result.get("price_low", 0)
