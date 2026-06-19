@@ -37,6 +37,25 @@ except ImportError as e:
 import config  # 模型档位配置（经济/标准/旗舰）
 
 # ==========================================
+# 1b. Agent 大脑（双脑并存：结果页「咨询专家」对话改用自主 Agent）
+#    —— ⚠️ 懒加载：langchain/agent 只在用户真正进入对话时才 import，
+#       绝不在启动 / 鉴定主流程占内存，避免 Streamlit 免费版 1GB OOM 被重启。
+#    —— 加载失败时自动回退到原 get_follow_up_answer，保证页面永不崩。
+# ==========================================
+_AGENT_MODULES = None  # 缓存：(build_agent, run_turn, HumanMessage, AIMessage, usage)
+
+
+def _load_agent():
+    """首次进入「咨询专家」对话时才加载 langchain/agent，降低主流程内存峰值。"""
+    global _AGENT_MODULES
+    if _AGENT_MODULES is None:
+        from agent.snowboard_agent import build_agent, run_turn
+        from langchain_core.messages import HumanMessage, AIMessage
+        from utils import usage as agent_usage
+        _AGENT_MODULES = (build_agent, run_turn, HumanMessage, AIMessage, agent_usage)
+    return _AGENT_MODULES
+
+# ==========================================
 # 2. 页面配置
 # ==========================================
 st.set_page_config(
@@ -734,20 +753,82 @@ else:
                     except Exception as e:
                         st.error(f"修正失败: {e}")
 
-    # 聊天区
+    # 聊天区（大脑 = 自主 Agent：多轮追问 + 自主调用 查行情 / 查保值 / 查保养 工具）
     st.markdown('<div class="subhead"><span class="bar"></span>咨询专家</div>', unsafe_allow_html=True)
+
+    def _board_context_msg():
+        """把这块板已完成的鉴定结论打包成背景，喂给 Agent，让追问围绕它展开。"""
+        calc = data.get("calculation_process", [])
+        calc_txt = "；".join(str(c) for c in calc) if isinstance(calc, list) else str(calc)
+        return (
+            "【当前正在讨论的这块雪板 · 已完成鉴定，用户接下来的问题都围绕它】\n"
+            f"品牌：{brand}｜型号：{model}｜成色：{score}/10\n"
+            f"估价：¥{data.get('price_low', 0)} ~ ¥{data.get('price_high', 0)}"
+            f"（建议成交 ¥{data.get('suggest_price', 0)}）\n"
+            f"损伤：板底 {data.get('base_damage', '无')}；钢边 {data.get('edge_damage', '无')}\n"
+            f"定价过程：{calc_txt}\n"
+            f"专家点评：{data.get('expert_review', '')}\n"
+            "注意：这块板已经看过图、估过价，不要重新估价；需要时可调用 search_market_price / "
+            "get_brand_liquidity / query_gear_knowledge 交叉验证或补充知识。"
+        )
+
+    # 渲染历史
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    if prompt := st.chat_input("对估价有疑问？问问老炮儿..."):
+    # 输入框放进容器 → 内联显示在「咨询专家」区块正下方；
+    # 否则 Streamlit 会把顶层 st.chat_input 固定吸附到浏览器窗口最底端。
+    chat_input_box = st.container()
+    if prompt := chat_input_box.chat_input("对估价有疑问？问问老炮儿（可追问 / 让我查行情 / 查保值）..."):
         st.session_state.chat_history.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
         with st.chat_message("assistant"):
-            with st.spinner("思考中..."):
-                ans = get_follow_up_answer(prompt, data)
+            with st.spinner("老炮正在掂量..."):
+                _agent_usage = None
+                try:
+                    # 首次提问才加载 langchain/agent（懒加载，省内存），并按档位缓存/重建
+                    build_agent, run_turn, HumanMessage, AIMessage, agent_usage = _load_agent()
+                    if (st.session_state.get("_agent_tier") != st.session_state.tier
+                            or "agent_executor" not in st.session_state):
+                        st.session_state._agent_tier = st.session_state.tier
+                        st.session_state.agent_executor = build_agent(verbose=False)
+
+                    # 鉴定结论作为背景 + 历史对话 → 转成 LangChain 消息喂给 Agent
+                    lc_history = [
+                        HumanMessage(content=_board_context_msg()),
+                        AIMessage(content="收到，这块板的鉴定结果我已经清楚了。"),
+                    ]
+                    for m in st.session_state.chat_history[:-1]:  # 不含刚加入的本轮提问
+                        if m["role"] == "user":
+                            lc_history.append(HumanMessage(content=m["content"]))
+                        else:
+                            lc_history.append(AIMessage(content=m["content"]))
+                    # 结果页不再传图：板已估完，追问只需答疑 + 非视觉工具
+                    ans = run_turn(
+                        st.session_state.agent_executor,
+                        prompt,
+                        image_paths=None,
+                        chat_history=lc_history,
+                    )
+                    _agent_usage = agent_usage
+                except Exception as e:
+                    # Agent 不可用/出错 → 回退基础单轮问答，绝不让页面崩
+                    ans = f"（Agent 暂不可用，已回退基础问答：{e}）\n\n" + get_follow_up_answer(prompt, data)
+
                 st.write(ans)
+
+                # 本轮用量（Agent 自带 token 埋点）
+                if _agent_usage is not None:
+                    try:
+                        s = _agent_usage.summary()
+                        if s.get("calls"):
+                            st.caption(
+                                f"📊 本轮：{s['calls']} 次调用 · {s['total_tokens']} tokens · ≈¥{s['cost']:.4f}（估算）")
+                    except Exception:
+                        pass
+
                 st.session_state.chat_history.append({"role": "assistant", "content": ans})
 
     render_footer()
