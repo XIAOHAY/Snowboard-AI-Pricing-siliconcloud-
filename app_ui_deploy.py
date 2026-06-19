@@ -55,6 +55,28 @@ def _load_agent():
         _AGENT_MODULES = (build_agent, run_turn, HumanMessage, AIMessage, agent_usage)
     return _AGENT_MODULES
 
+
+# ==========================================
+# 1c. 上传图压缩（关键：免费版 1GB 内存，手机原图会把进程顶爆被重启）
+#    —— 分析前把最长边压到 max_side、转 JPEG，显著降低内存与上行体积，
+#       识别效果不受影响（VL 模型本就不需要超大图）。失败则原样返回，不影响功能。
+# ==========================================
+def _downscale_image(raw_bytes: bytes, max_side: int = 1024, quality: int = 85) -> bytes:
+    try:
+        from PIL import Image
+        import io
+        im = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+        w, h = im.size
+        scale = min(1.0, max_side / max(w, h))
+        if scale < 1.0:
+            im = im.resize((int(w * scale), int(h * scale)), Image.LANCZOS)
+        buf = io.BytesIO()
+        im.save(buf, format="JPEG", quality=quality, optimize=True)
+        return buf.getvalue()
+    except Exception:
+        return raw_bytes
+
+
 # ==========================================
 # 2. 页面配置
 # ==========================================
@@ -504,10 +526,10 @@ if not st.session_state.current_data:
                         analysis_results = []
                         uploaded_images_bytes = []
                         for uploaded_file in uploaded_files:
-                            file_bytes = uploaded_file.read()
+                            # 先压缩再用：送模型 + 存 session_state 都用压缩后的小图，省内存
+                            file_bytes = _downscale_image(uploaded_file.read())
                             uploaded_images_bytes.append(file_bytes)
-                            suffix = os.path.splitext(uploaded_file.name)[1]
-                            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
                                 tmp.write(file_bytes)
                                 temp_path = tmp.name
                             try:
