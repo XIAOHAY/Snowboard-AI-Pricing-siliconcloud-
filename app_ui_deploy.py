@@ -799,10 +799,14 @@ else:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # 输入框放进容器 → 内联显示在「咨询专家」区块正下方；
-    # 否则 Streamlit 会把顶层 st.chat_input 固定吸附到浏览器窗口最底端。
-    chat_input_box = st.container()
-    if prompt := chat_input_box.chat_input("对估价有疑问？问问老炮儿（可追问 / 让我查行情 / 查保值）..."):
+    # 输入框优先内联在容器里；个别 Streamlit 版本不支持「容器内 chat_input」会抛错，
+    # 此时回退到顶层 st.chat_input（会吸底，但保证结果页在任何版本都不崩）。
+    _chat_ph = "对估价有疑问？问问老炮儿（可追问 / 让我查行情 / 查保值）..."
+    try:
+        prompt = st.container().chat_input(_chat_ph)
+    except Exception:
+        prompt = st.chat_input(_chat_ph)
+    if prompt:
         st.session_state.chat_history.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
