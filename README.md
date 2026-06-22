@@ -3,7 +3,7 @@
 > 一个**多模态、工具调用（tool-calling）**的二手雪板估价智能体：上传雪板照片即可得到成色鉴定与确定性估价，并能就品牌保值、真实行情、保养知识进行多轮对话。
 > 核心特色：**感知/决策分离治理大模型幻觉报价 · 模型档位（梯度收费）· 真实闲鱼行情交叉验证 · 自带评测集与用量观测。**
 
-🔗 在线 Demo：<在此放你的 Streamlit 链接>
+🔗 在线 Demo：https://huggingface.co/spaces/ROMANLEX/snowboard-ai-pricing
 
 ---
 
